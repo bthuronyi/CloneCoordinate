@@ -1,0 +1,55 @@
+Experiments,,,1. Sample properties,,"2a. Queueing, general",,,,,,,,"2b. Queueing, constructs/IDs",,,,,,3. Execution,,,,,,
+"=iferror(if(join("","",filter(A3:A,A3:A<>""""))<>join("","",sequence(max(A3:A))),
+""ERROR near #""&index(filter(sort(A3:A,1,TRUE),sort(A3:A,1,TRUE)<>sort(row(A3:A)-2,1,TRUE)),1)-1&""!"", 
+""Serial #""),""Serial #"")","={""ID"";arrayformula(if(A3:A<>"""",""e""&A3:A,""""))}",Status,What to do with this experiment?,General notes,Date queued,Queued by,Experiment title,Short description / experimental question,Notebook entry / link,Project,Related / duplicate experiment(s),Assay(s) needed / notes,Describe control condition(s),Control construct(s) / IDs needed,Describe experimental condition(s),Experimental construct(s) / IDs needed,Status needed to consider ID(s) to be ready to use,Statuses,Experiment ready?,Notification threshold,Email to notify when ready (or status changes) - via Construct Tracker,Date started,Started by,Date finished,Finished by
+1,e1,"=ifs(A3="""","""",
+and(D3<>"""",not(regexmatch(D3,""[Pp]roceed""))),D3,
+S3="""",""specify construct(s)/ID(s) needed"",
+W3="""",if(T3=""Ready"",""ready to start"",T3),
+Y3="""",""in progress"",
+TRUE,""Complete ♥""
+)&
+let(entry_list, {F3:I3,K3,M3:Q3,U3,W3:Z3},
+ifs(
+index(entry_list,1)="""","""",
+NOT(regexmatch(join(""◆"",entry_list),""[^◆]◆{2,}[^◆]"")),"""",
+true,char(10)&""missing data?""
+))",,,,,,,,,,,,,,,,"=if(and(O3="""",Q3=""""),"""",
+trim(join(char(10),
+let(entries,transpose(split(join("","",O3,Q3),"", ""&char(10))),
+let(
+ construct_names,iferror(filter(entries,not(regexmatch(entries,""^[odagms]\d+$""))),""none""),
+ IDs,iferror(filter(entries,regexmatch(entries,""^[odagms]\d+$"")),""none""),
+let(
+  construct_statuses,
+  if(construct_names<>""none"",byrow(construct_names,lambda(name,iferror(index(Registry_Status,xmatch(name,Registry_Construct_name)),""Construct not found?""))),""""),
+  IDs_statuses,
+  if(IDs<>""none"",byrow(IDs,lambda(ID,let(x,GET_STATUS_BY_ID(ID),if(AND(x<>"""",x<>FALSE),x,""Invalid ID ""&ID&""?"")))),""""),
+byrow({flatten(construct_names,IDs),flatten(construct_statuses,IDs_statuses)},lambda(row,iferror(if(index(row,1)<>""none"",index(row,1)&"": ""&index(row,2),""""))))
+))))))
+","=ifs(or(A3="""",S3=""""),"""",
+Y3<>"""",""Complete"",
+W3<>"""",""In progress"",
+FALSE,""This code duplicates part of the adjacent column but provides the trigger for email notifications, so only email-worthy messages/changes should display here"",TRUE,
+let(entries,transpose(split(join("","",O3,Q3),"", "")),
+let(
+ construct_names,iferror(filter(entries,not(regexmatch(entries,""^[odagms]\d+$""))),""none""),
+ IDs,iferror(filter(entries,regexmatch(entries,""^[odagms]\d+$"")),""none""),
+let(
+  construct_statuses,
+  if(construct_names<>""none"",byrow(construct_names,lambda(name,iferror(index(Registry_Status,xmatch(name,Registry_Construct_name)),""Construct not found?""))),""""),
+  IDs_statuses,
+  if(IDs<>""none"",byrow(IDs,lambda(ID,let(x,GET_STATUS_BY_ID(ID),if(or(x<>"""",x<>FALSE),x,""Invalid ID ""&ID&""?"")))),""""),
+ifs(
+regexmatch(join("","",construct_statuses),""[Aa]bandon""),""Required construct abandoned!"",
+regexmatch(join("","",construct_statuses),""hold""),""Required construct held?"",
+regexmatch(join("","",construct_statuses),""Invalid""),""Required construct not found in Registry!"",
+regexmatch(join("","",IDs_statuses),""⛔""),""Required ID is marked ⛔!"",
+regexmatch(join("","",IDs_statuses),""stalled""),""Required ID has status 'stalled'!"",
+regexmatch(join("","",IDs_statuses),""Invalid""),""Required ID not found!"",
+TRUE,let(output,
+   trim(join(char(10),
+    ifs(construct_names=""none"","""",counta(construct_statuses)=countif(construct_statuses,""*omplete*""),""Constructs ready"",TRUE,""Wait on constructs""),
+    ifs(IDs=""none"","""",counta(IDs_statuses)=countif(IDs_statuses,""*""&R3&""*""),""IDs ready"",TRUE,""Wait on IDs""))),
+if(regexmatch(output,""Wait""),output,""Ready"")))
+))))",,,,,,

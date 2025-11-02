@@ -1,0 +1,374 @@
+Assembly a,,,,,,1. Sample properties,,,,2. Queueing,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"3a. Assembly, calculated volumes",,,,,,,,,"3b. Assembly, actual volumes",,,,,,,,,,3c. Assembly,,,,,4. Transformation data,,,,,,,,formula-related cells: don't modify unless you know what you're doing,,,,,,,,,,,,,,,,=settings_aTargetNkuUSER*(1-0.15*(column(CT2)-column($CT$2))),Volume remaining in assembly using trial target nkµ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+"=iferror(if(join("","",filter(A3:A,A3:A<>""""))<>join("","",sequence(max(A3:A))),
+""ERROR near #""&index(filter(sort(A3:A,1,TRUE),sort(A3:A,1,TRUE)<>sort(row(A3:A)-2,1,TRUE)),1)-1&""!"", 
+""Serial #""),""Serial #"")","={""ID"";arrayformula(if(A3:A<>"""",""a""&A3:A,""""))}","={if(regexmatch(settings_SampleStoragePlateSize,""b""),""Box"",""Well"")&if(settings_aStoreInPlates?,"""",char(10)&""(not used)"")
+;arrayformula(if(A3:A="""","""",ID_TO_WELL(settings_SampleStoragePlateSize,B3:B)))}",Sort #,Construct name,Status,"Priority
+?",What to do with this sample?,General notes,Exclude from analysis?,Date queued,Queued by,Queue notes,Assembly type & conditions,Scale,Part 1,Part 2,Part 3,Part 4,Part 5,Part 6,Part 7,Part 8,='Transformations t'!K2,='Transformations t'!L2,Certify correctly queued,Queueing validity check,Assembly type,Part types,,,,,,,,Part statuses,,,,,,,,={CB2:CB},Premix µL,Overqueued part(s)?,Parts with same color & marker as final construct,Volume calculation,µL 1,µL 2,µL 3,µL 4,µL 5,µL 6,µL 7,µL 8,µL 1 used,µL 2 used,µL 3 used,µL 4 used,µL 5 used,µL 6 used,µL 7 used,µL 8 used,µL water,Part actual concentrations (nkµ),Date assembled,Assembled by,Incubation program,Incubation time (min),Assembly notes,Marker,Latest transformation ID,Latest date transformed,Date plates scored,"={""Transformation information"";
+byrow(BV3:BV,
+lambda(tID,
+if(tID="""","""",
+iferror(
+let(input_data,transpose(index({Transformations_Comp_cell_procedure,Transformations_Comp_cell_source,Transformations_Colony_counts,Transformations_Colony_sizes,Transformations_Colors,Transformations_Score_notes},
+ID_TO_INDEX(tID))),
+filtered_input_data,filter(input_data,input_data<>""""),
+join("" / "",filtered_input_data)
+)))))}","={""Transformation status"";byrow(BV3:BV,
+lambda(tID,
+if(tID="""","""",
+index(Transformations_Status,ID_TO_INDEX(tID)))
+))}",Expected Color,Duplicate(s),nkµ stock parts,,,,,,,,actual nkµ in rxn,,,,,,,,Limiting nkµ,"=(1-0.1*(column(CT2)-column($CT$2)))&"" x target""","=(1-0.1*(column(CU2)-column($CT$2)))&"" x target""","=(1-0.1*(column(CV2)-column($CT$2)))&"" x target""","=(1-0.1*(column(CW2)-column($CT$2)))&"" x target""","=(1-0.1*(column(CX2)-column($CT$2)))&"" x target""","=(1-0.1*(column(CY2)-column($CT$2)))&"" x target""","=(1-0.1*(column(CZ2)-column($CT$2)))&"" x target""","=(1-0.1*(column(DA2)-column($CT$2)))&"" x target""","=(1-0.1*(column(DB2)-column($CT$2)))&"" x target""","=(1-0.1*(column(DC2)-column($CT$2)))&"" x target""",New target nkµ for this assembly,# parts ,Requeue?,Construct name unregistered?,Concatenated parts list for dID <> uID referencing,"=""Left junction, sequence, or enzyme, ""&P2","=""Left junction or sequence, ""&Q2","=""Left junction or sequence, ""&R2","=""Left junction or sequence, ""&S2","=""Left junction or sequence, ""&T2","=""Left junction or sequence, ""&U2","=""Left junction or sequence, ""&V2","=""Left junction or sequence, ""&W2","=""Right junction or sequence, ""&P2","=""Right junction or sequence, ""&Q2","=""Right junction or sequence, ""&R2","=""Right junction or sequence, ""&S2","=""Right junction or sequence, ""&T2","=""Right junction or sequence, ""&U2","=""Right junction or sequence, ""&V2","=""Right junction or sequence, ""&W2"
+1,a1,a01.A01,,,"=let(output,ifs(
+A3="""","""",
+counta(iferror(filter(P3:W3,P3:W3<>"""")))=0,"""",
+iserror(xmatch(E3,Registry_Construct_name)),""construct not registered!"",
+regexmatch(index(Registry_Status,xmatch(E3,Registry_Construct_name)),""[Aa]bandon""),""construct abandoned"",
+regexmatch(index(Registry_Status,xmatch(E3,Registry_Construct_name)),""held""),""wait; construct held"",
+regexmatch(H3,""⛔""),H3,
+not(Z3),""certify queueing!"",
+BP3="""",ifs(
+ and(BN3<>"""",BN3<-0.3),""negative water volume! revise"",
+ countif(AK3:AR3,""*⛔*"")>0,""part failed!"",
+ countif(AK3:AR3,""certify queueing!"")>0, ""certify dID queueing!"",
+ countif(P3:W3,""<>"")<>countif(AK3:AR3,""*done*""),""wait on part"",
+ regexmatch(H3,""(hold)""),""held"",
+ TRUE,""ready to assemble"")&if(AU3<>"""",char(10)&AU3,""""),
+regexmatch(H3,""(hold)""),""held"",
+
+BW3="""",ifs(
+ countif(AK3:AR3,""⛔"")>0,""part failed!"",
+ regexmatch(H3,""don't transform""),""transformation manually held"",
+ sum(iferror(arrayformula(value(split(textjoin("", "",TRUE,filter(Transformations_Transformed_amount,Transformations_Source_ID=B3)),"", ""))),0))>=O3,""ran out!"",
+  TRUE,""ready to transform""),
+iferror(regexmatch(index(Transformations_What_to_do_with_this, max(filter(row(Transformations_Source_ID), Transformations_Source_ID=B3))),""⛔"")),""Recent instance of transformation has been manually terminated - check Transformations sheet?"",
+and(regexmatch(H3,""(retransform)""),counta(iferror(filter(Transformations_Source_ID,Transformations_Source_ID=B3,Transformations_Date_transformed<>"""")))<2),if(
+ and(O3<>"""",sum(iferror(arrayformula(value(split(textjoin("", "",TRUE,filter(Transformations_Transformed_amount,Transformations_Source_ID=B3)),"", ""))),0))>=O3),""ran out!"",if(
+  iferror(regexmatch(index(Transformations_Colony_counts,xmatch(B3,Transformations_Source_ID)),""no"")),""stalled - no colonies after transformation"",""ready to transform""&char(10)&""(repeat)"")),
+counta(iferror(filter(Transformations_Source_ID,Transformations_Source_ID=B3,Transformations_Date_transformed="""")))>0,if(
+ and(O3<>"""",sum(iferror(arrayformula(value(split(textjoin("", "",TRUE,filter(Transformations_Transformed_amount,Transformations_Source_ID=B3)),"", ""))),0))>=O3),""ran out!"",if(
+  iferror(regexmatch(index(Transformations_Colony_counts,xmatch(B3,Transformations_Source_ID)),""no"")),""stalled - no colonies after transformation"",""ready to transform""&char(10)&""(repeat)"")),
+and(BX3="""",iferror(not(regexmatch(index(Transformations_What_to_do_with_this,xmatch(B3,Transformations_Source_ID)),""⛔"")),FALSE)),if(
+  value(text(today(),""yymmdd""))-value(BW3)>0,""score plates (on Transformations)"",""score plates tomorrow (transformed today)""),
+regexmatch(index(Registry_Status,xmatch(E3,Registry_Construct_name)),""[Cc]omplete""),""done; construct complete"",
+
+counta(iferror(filter(Minipreps_m_Source_ID,(Minipreps_m_Source_ID=B3)+(Minipreps_m_Source_of_tID=B3),regexmatch(Minipreps_m_Status,""ready to inoculate|ready to miniprep""))))>0,
+  counta(iferror(filter(Minipreps_m_Source_ID,(Minipreps_m_Source_ID=B3)+(Minipreps_m_Source_of_tID=B3),regexmatch(Minipreps_m_Status,""ready to inoculate|ready to miniprep""))))&"" minipreps queued"",
+counta(iferror(filter(Minipreps_m_Source_ID,(Minipreps_m_Source_ID=B3)+(Minipreps_m_Source_of_tID=B3),not(regexmatch(Minipreps_m_Status,""([Ff]ail)|(stalled)"")),Minipreps_m_Date_purified>BX3)))=0,
+ if(regexmatch(BZ3,""(don't)|(can't)|(no correct colonies)|(no colonies!)|⛔""),
+  if(and(O3<>"""",sum(iferror(arrayformula(value(split(textjoin("", "",TRUE,filter(Transformations_Transformed_amount,Transformations_Source_ID=B3)),"", ""))),0))<O3),if(
+   iferror(regexmatch(index(Transformations_Colony_counts,xmatch(B3,Transformations_Source_ID)),""no"")),""stalled - no colonies after transformation"",""ready to transform""&char(10)&""(repeat)""),""transformed; stalled (can't queue minipreps)""),
+    if(and(settings_AnalyticalPCRaIDRequireQueueingAfterTransformation,regexmatch(BZ3,""PCR"")),""waiting for analytical PCR"",""ready to queue miniprep"")),
+TRUE,""done"")&
+if(G3,"" (priority)"","""")&
+if(regexmatch(Lookup_lists_and_tabulations_Verified_mID_Sources,"",""&B3&"",""),char(10)&""♥ good mID"",""""),
+if(or(regexmatch(output,""ran out!""),regexmatch(output,""abandoned""),BP3=""""),output,output&if(sum(iferror(arrayformula(value(split(textjoin("", "",TRUE,filter(Transformations_Transformed_amount,Transformations_Source_ID=B3)),"", ""))),0))>=O3,if(A3="""","""",char(10)&""ran out!""),"""")))&
+let(
+entry_list, {$K3:$L3,$N3:$P3,$Z3,$BF3,$BP3:$BS3},
+ifs(
+index(entry_list,1)="""","""",
+NOT(regexmatch(join(""◆"",entry_list),""[^◆]◆{2,}[^◆]"")),"""",
+true,char(10)&""missing data?""
+))","=if(A3="""","""",
+iferror(and(B3<>"""",regexmatch(Registry_Priority_flagged_IDs,B3&"",""))))",,,,,,,,,,,,,,,,,,,,"=ifs(
+A3="""","""",
+Z3,"""",
+TRUE,""Make sure calculation has finished?""&char(10))&
+ifs(
+A3="""","""",
+Z3,""Certified OK"",
+counta(P3:W3)=0,"""",
+P3="""",""Part 1 must be entered!"",
+countunique(P3:W3)<>counta(P3:W3),""Duplicate parts detected!"",
+TRUE,switch(AB3,
+""USER"",ifs(
+counta(P3:W3)=1,if(exact(DI3,DQ3),""✓ Junctions verified"",""Junction error: check parts!""),
+regexmatch(concatenate(DI3:DX3),""\_""),
+ if(
+ if(regexmatch(DQ3,""\_""),
+   if(iferror(MATCH_FRAGMENT_JUNCTIONS_3PRIME(join(""|"",filter(DJ3:DP3,DJ3:DP3<>"""")),join(""|"",filter(DR3:DX3,DR3:DX3<>"""")),index(split(DQ3,""_""),1))=index(split(DI3,""_""),1),FALSE),TRUE,
+   iferror(MATCH_FRAGMENT_JUNCTIONS_3PRIME(join(""|"",filter(DJ3:DP3,DJ3:DP3<>"""")),join(""|"",filter(DR3:DX3,DR3:DX3<>"""")),index(split(DQ3,""_""),2))=index(split(DI3,""_""),2),FALSE)),
+ iferror(MATCH_FRAGMENT_JUNCTIONS_3PRIME(join(""|"",filter(DJ3:DP3,DJ3:DP3<>"""")),join(""|"",filter(DR3:DX3,DR3:DX3<>"""")),DQ3)=DI3,FALSE)),
+""✓ Junctions verified"",
+ if(
+ if(regexmatch(DR3,""\_""),
+   if(iferror(MATCH_FRAGMENT_JUNCTIONS_3PRIME(join(""|"",filter({DK3:DP3,DI3},{DK3:DP3,DI3}<>"""")),join(""|"",filter({DS3:DX3,DQ3},{DS3:DX3,DQ3}<>"""")),index(split(DR3,""_""),1))=index(split(DJ3,""_""),1),FALSE),TRUE,
+   iferror(MATCH_FRAGMENT_JUNCTIONS_3PRIME(join(""|"",filter({DK3:DP3,DI3},{DK3:DP3,DI3}<>"""")),join(""|"",filter({DS3:DX3,DQ3},{DS3:DX3,DQ3}<>"""")),index(split(DR3,""_""),2))=index(split(DJ3,""_""),2),FALSE)),
+ iferror(MATCH_FRAGMENT_JUNCTIONS_3PRIME(join(""|"",filter({DK3:DP3,DI3},{DK3:DP3,DI3}<>"""")),join(""|"",filter({DS3:DX3,DQ3},{DS3:DX3,DQ3}<>"""")),DR3)=DJ3,FALSE)),
+""✓ Junctions verified"",
+""Junction error: check parts!"")),
+countunique(DI3:DX3)*2<>counta(DI3:DX3),""Junction error: check parts!"",
+counta(P3:W3)*2<>counta(DI3:DX3),""Junction(s) not found: all parts need sequences entered!"",
+iferror(MATCH_FRAGMENT_JUNCTIONS_3PRIME(join(""|"",filter(DJ3:DP3,DJ3:DP3<>"""")),join(""|"",filter(DR3:DX3,DR3:DX3<>"""")),DQ3)=DI3,FALSE),""✓ Junctions verified"",
+TRUE,""Junction error: check parts!""),
+""Gibson"",
+ifs(
+counta(P3:W3)=1,if(COMMON_SUBSTRING_BY_WINDOW_FROM_LEFT(DI3,DQ3,settings_aGibsonExactMatchBases,1),""✓ Junctions verified"",
+if(COMMON_SUBSTRING_BY_WINDOW_FROM_LEFT(DI3,DQ3,floor(settings_aGibsonExactMatchBases*0.67),1),""Does not validate with exact match ""&settings_aGibsonExactMatchBases&"" but does validate with ""&floor(settings_aGibsonExactMatchBases*0.67)&""?"",""Junction error: check parts!"")),
+counta(P3:W3)*2<>counta(DI3:DX3),""Some junction(s) not found: all parts need sequences entered!"",
+iferror(COMMON_SUBSTRING_BY_WINDOW_FROM_LEFT(DI3,MATCH_GIBSON_3PRIME(join(""|"",filter(DJ3:DP3,DJ3:DP3<>"""")),join(""|"",filter(DR3:DX3,DR3:DX3<>"""")),DQ3,settings_aGibsonExactMatchBases),settings_aGibsonExactMatchBases,1),FALSE),""✓ Junctions verified"",
+iferror(COMMON_SUBSTRING_BY_WINDOW_FROM_LEFT(DI3,MATCH_GIBSON_3PRIME(join(""|"",filter(DJ3:DP3,DJ3:DP3<>"""")),join(""|"",filter(DR3:DX3,DR3:DX3<>"""")),DQ3,floor(settings_aGibsonExactMatchBases*0.67)),floor(settings_aGibsonExactMatchBases*0.67),1),FALSE),""Does not validate with exact match ""&settings_aGibsonExactMatchBases&"" but does validate with ""&floor(settings_aGibsonExactMatchBases*0.67)&""?"",
+TRUE,""Junction error: check parts!""),
+""Ligation"",
+if(regexmatch(join("" "",AC3:AJ3),""(PCR)|(anneal)""),""Check parts! Not all parts are digests.""&""
+""&trim(join(""
+"",bycol(P3:W3, lambda(y, if(y<>"""", y&"": "" & bycol(P3:W3, lambda(x,textjoin("""", TRUE, index(dsDNA_d_Type,xmatch(y,dsDNA_d_ID))))),""""))))),
+if(counta(P3:W3)=1, ""One piece ligation?"", if(counta(P3:W3)=2,if(textjoin("" "", TRUE, sort(transpose(index({dsDNA_d_Digest_enzyme1,dsDNA_d_Digest_enzyme2},xmatch(P3,dsDNA_d_ID)))))=textjoin("" "", TRUE, sort(transpose(index({dsDNA_d_Digest_enzyme1,dsDNA_d_Digest_enzyme2},xmatch(Q3,dsDNA_d_ID))))),""✓ Junctions verified"",""Junction error: check parts!""),""Multiple piece ligation check not currently implemented. Check parts manually for compatibility.""&""
+""&trim(join(""
+"",bycol(P3:W3, lambda(y, if(y<>"""", y&"": "" & bycol(P3:W3, lambda(x,textjoin("", "", TRUE, sort(index({dsDNA_d_Digest_enzyme1,dsDNA_d_Digest_enzyme2},xmatch(y,dsDNA_d_ID)))))),"""")))))))),
+""unknown assembly type!""))&
+ifs(
+A3="""","""",
+Z3,"""",
+AV3<>"""",char(10)&""Some parts derive from constructs with the same color & marker?: ""&AV3,
+TRUE,""""
+)","=if(N3="""","""",index(settings_aAssemblyTypesForRecipes,xmatch(N3,settings_aAssemblyTypeAndConditions)))","=if(P3="""","""",index(dsDNA_d_Type,xmatch(P3,dsDNA_d_ID)))","=if(Q3="""","""",index(dsDNA_d_Type,xmatch(Q3,dsDNA_d_ID)))","=if(R3="""","""",index(dsDNA_d_Type,xmatch(R3,dsDNA_d_ID)))","=if(S3="""","""",index(dsDNA_d_Type,xmatch(S3,dsDNA_d_ID)))","=if(T3="""","""",index(dsDNA_d_Type,xmatch(T3,dsDNA_d_ID)))","=if(U3="""","""",index(dsDNA_d_Type,xmatch(U3,dsDNA_d_ID)))","=if(V3="""","""",index(dsDNA_d_Type,xmatch(V3,dsDNA_d_ID)))","=if(W3="""","""",index(dsDNA_d_Type,xmatch(W3,dsDNA_d_ID)))","=if(P3="""","""",
+index(dsDNA_d_Status,xmatch(P3,dsDNA_d_ID)))","=if(Q3="""","""",
+index(dsDNA_d_Status,xmatch(Q3,dsDNA_d_ID)))","=if(R3="""","""",
+index(dsDNA_d_Status,xmatch(R3,dsDNA_d_ID)))","=if(S3="""","""",
+index(dsDNA_d_Status,xmatch(S3,dsDNA_d_ID)))","=if(T3="""","""",
+index(dsDNA_d_Status,xmatch(T3,dsDNA_d_ID)))","=if(U3="""","""",
+index(dsDNA_d_Status,xmatch(U3,dsDNA_d_ID)))","=if(V3="""","""",
+index(dsDNA_d_Status,xmatch(V3,dsDNA_d_ID)))","=if(W3="""","""",
+index(dsDNA_d_Status,xmatch(W3,dsDNA_d_ID)))",,"=if(or(O3="""",AB3=""""),"""",
+switch(AB3,
+ ""USER"",settings_aUSERPremixFraction*O3,
+ ""Gibson"",settings_aGibsonPremixFraction*O3,
+ ""Ligation"",settings_aLigationPremixFraction*O3,
+))","=ifs(
+A3="""","""",
+BP3<>"""","""",
+TRUE,
+trim(join(char(10),bycol(P3:W3,
+lambda(x,
+iferror(ifs(
+x="""",,
+left(x)=""d"",let(vol_queued,index('(Lookup lists & tabulations)'!$M$3:$M,xmatch(x,'(Lookup lists & tabulations)'!$L$3:$L)),vol_available,index('dsDNA d'!$L$3:$L,xmatch(x,'dsDNA d'!$B$3:$B)),
+ ifs(
+  vol_available<settings_dMinVolumeToStillUse,x&"" ran out!"",
+  vol_queued>vol_available-settings_dMinVolumeToStillUse,x&"" overqueued!"",
+  vol_queued>vol_available-settings_dMinVolumeWarn,x&"" nearly overqueued?"",
+  TRUE,)),
+ TRUE,),))))))","=IFERROR(join("" 
+ "",let(output, unique(arrayformula(trim(bycol(
+bycol(P3:W3,
+lambda(x,if(x="""","""",index(dsDNA_d_Input_DNA,xmatch(x,dsDNA_d_ID))))),
+lambda(x,if(or(x="""",x=""anneal""),"""",
+  iferror(if(and(
+    regexmatch(index(Registry_Color,xmatch(x,Registry_Construct_name)), index(Registry_Color,xmatch(E3,Registry_Construct_name))),
+    regexmatch(index(Registry_Marker,xmatch(x,Registry_Construct_name)), index(Registry_Marker,xmatch(E3,Registry_Construct_name)))), 
+   x,""""),"""")))))),TRUE), filter(output, output<>""""))), """")","=if(or(A3="""",BP3<>"""",regexmatch(H3,""(hold)""),AB3=""Other (no automatic CC support)""),"""",
+if(O3="""",""Set scale!"",if(
+iserror(CT3),""Part size missing!"",if(
+iserror(DD3),""Part conc too low!"",
+let(vols,arrayformula(IFERROR($O3*$DD3/$CC3:$CJ3,"""")),
+{""For ""&text(DD3,""0.0"")&"" nkµ:"",vols})))))",,,,,,,,,,,,,,,,,"=let(water,O3-AT3-sum(BF3:BM3),
+if(abs(water)<0.1,"""",water))","=if(BF3="""","""",
+join("","",filter(CK3:CR3,CK3:CR3<>""""))&
+if(regexmatch(concatenate(CK3:CR3),""\?""),"""",""; min ""&text(min(CK3:CR3),""0.0"")))",,,,,,"=if($E3="""","""",
+index(Registry_Marker,xmatch($E3,Registry_Construct_name)))","=if(A3="""","""",
+let(
+IDs,filter(Transformations_ID,Transformations_Source_ID=B3),
+dates,filter(Transformations_Date_transformed,Transformations_Source_ID=B3),
+if(iferror(or(len(dates)=0,dates=""""),TRUE),"""",if(countblank(dates)>0,"""",index(IDs,xmatch(max(dates),dates))))
+))","=if(BV3="""","""",
+index(Transformations_Date_transformed,ID_TO_INDEX(BV3)))","=if(BV3="""","""",
+index(Transformations_Date_scored,ID_TO_INDEX(BV3)))",,,"=if($E3="""","""",
+index(Registry_Color,xmatch($E3,Registry_Construct_name)))","=if(A3="""","""",
+trim(join(char(10),
+byrow(
+sort(
+iferror(filter($A$3:$A,$E$3:$E<>"""",$E$3:$E=E3,$B$3:B<>B3),""""),
+1,FALSE
+),
+lambda(r,if(r<>"""",join("" "",r,substitute(index(F$3:F,r),char(10),"" "")),""""))
+))))","=if(P3="""","""",
+index('dsDNA d'!$CJ:$CJ,xmatch(P3,dsDNA_d_ID)))","=if(Q3="""","""",
+index('dsDNA d'!$CJ:$CJ,xmatch(Q3,dsDNA_d_ID)))","=if(R3="""","""",
+index('dsDNA d'!$CJ:$CJ,xmatch(R3,dsDNA_d_ID)))","=if(S3="""","""",
+index('dsDNA d'!$CJ:$CJ,xmatch(S3,dsDNA_d_ID)))","=if(T3="""","""",
+index('dsDNA d'!$CJ:$CJ,xmatch(T3,dsDNA_d_ID)))","=if(U3="""","""",
+index('dsDNA d'!$CJ:$CJ,xmatch(U3,dsDNA_d_ID)))","=if(V3="""","""",
+index('dsDNA d'!$CJ:$CJ,xmatch(V3,dsDNA_d_ID)))","=if(W3="""","""",
+index('dsDNA d'!$CJ:$CJ,xmatch(W3,dsDNA_d_ID)))","=ifs(
+BF3="""","""",
+CC3="""",""?"",
+TRUE,iferror(BF3*CC3/$O3))","=ifs(
+BG3="""","""",
+CD3="""",""?"",
+TRUE,iferror(BG3*CD3/$O3))","=ifs(
+BH3="""","""",
+CE3="""",""?"",
+TRUE,iferror(BH3*CE3/$O3))","=ifs(
+BI3="""","""",
+CF3="""",""?"",
+TRUE,iferror(BI3*CF3/$O3))","=ifs(
+BJ3="""","""",
+CG3="""",""?"",
+TRUE,iferror(BJ3*CG3/$O3))","=ifs(
+BK3="""","""",
+CH3="""",""?"",
+TRUE,iferror(BK3*CH3/$O3))","=ifs(
+BL3="""","""",
+CI3="""",""?"",
+TRUE,iferror(BL3*CI3/$O3))","=ifs(
+BM3="""","""",
+CJ3="""",""?"",
+TRUE,iferror(BM3*CJ3/$O3))","=if(P3="""","""",min(CC3:CJ3))","=if($P3="""","""",
+let(target,
+ switch($AB3,
+  ""USER"",settings_aTargetNkuUSER*(1-0.1*(column(CT2)-column($CT$2))),
+  ""Gibson"",settings_aTargetNkuGibson*(1-0.1*(column(CT2)-column($CT$2))),
+  ""Ligation"",settings_aTargetNkuLigation*(1-0.1*(column(CT2)-column($CT$2)))),
+$O3-$AT3-
+sum(arrayformula($O3*target/filter($CC3:$CJ3,$CC3:$CJ3<>"""")))))","=if($P3="""","""",
+let(target,
+ switch($AB3,
+  ""USER"",settings_aTargetNkuUSER*(1-0.1*(column(CU2)-column($CT$2))),
+  ""Gibson"",settings_aTargetNkuGibson*(1-0.1*(column(CU2)-column($CT$2))),
+  ""Ligation"",settings_aTargetNkuLigation*(1-0.1*(column(CU2)-column($CT$2)))),
+$O3-$AT3-
+sum(arrayformula($O3*target/filter($CC3:$CJ3,$CC3:$CJ3<>"""")))))","=if($P3="""","""",
+let(target,
+ switch($AB3,
+  ""USER"",settings_aTargetNkuUSER*(1-0.1*(column(CV2)-column($CT$2))),
+  ""Gibson"",settings_aTargetNkuGibson*(1-0.1*(column(CV2)-column($CT$2))),
+  ""Ligation"",settings_aTargetNkuLigation*(1-0.1*(column(CV2)-column($CT$2)))),
+$O3-$AT3-
+sum(arrayformula($O3*target/filter($CC3:$CJ3,$CC3:$CJ3<>"""")))))","=if($P3="""","""",
+let(target,
+ switch($AB3,
+  ""USER"",settings_aTargetNkuUSER*(1-0.1*(column(CW2)-column($CT$2))),
+  ""Gibson"",settings_aTargetNkuGibson*(1-0.1*(column(CW2)-column($CT$2))),
+  ""Ligation"",settings_aTargetNkuLigation*(1-0.1*(column(CW2)-column($CT$2)))),
+$O3-$AT3-
+sum(arrayformula($O3*target/filter($CC3:$CJ3,$CC3:$CJ3<>"""")))))","=if($P3="""","""",
+let(target,
+ switch($AB3,
+  ""USER"",settings_aTargetNkuUSER*(1-0.1*(column(CX2)-column($CT$2))),
+  ""Gibson"",settings_aTargetNkuGibson*(1-0.1*(column(CX2)-column($CT$2))),
+  ""Ligation"",settings_aTargetNkuLigation*(1-0.1*(column(CX2)-column($CT$2)))),
+$O3-$AT3-
+sum(arrayformula($O3*target/filter($CC3:$CJ3,$CC3:$CJ3<>"""")))))","=if($P3="""","""",
+let(target,
+ switch($AB3,
+  ""USER"",settings_aTargetNkuUSER*(1-0.1*(column(CY2)-column($CT$2))),
+  ""Gibson"",settings_aTargetNkuGibson*(1-0.1*(column(CY2)-column($CT$2))),
+  ""Ligation"",settings_aTargetNkuLigation*(1-0.1*(column(CY2)-column($CT$2)))),
+$O3-$AT3-
+sum(arrayformula($O3*target/filter($CC3:$CJ3,$CC3:$CJ3<>"""")))))","=if($P3="""","""",
+let(target,
+ switch($AB3,
+  ""USER"",settings_aTargetNkuUSER*(1-0.1*(column(CZ2)-column($CT$2))),
+  ""Gibson"",settings_aTargetNkuGibson*(1-0.1*(column(CZ2)-column($CT$2))),
+  ""Ligation"",settings_aTargetNkuLigation*(1-0.1*(column(CZ2)-column($CT$2)))),
+$O3-$AT3-
+sum(arrayformula($O3*target/filter($CC3:$CJ3,$CC3:$CJ3<>"""")))))","=if($P3="""","""",
+let(target,
+ switch($AB3,
+  ""USER"",settings_aTargetNkuUSER*(1-0.1*(column(DA2)-column($CT$2))),
+  ""Gibson"",settings_aTargetNkuGibson*(1-0.1*(column(DA2)-column($CT$2))),
+  ""Ligation"",settings_aTargetNkuLigation*(1-0.1*(column(DA2)-column($CT$2)))),
+$O3-$AT3-
+sum(arrayformula($O3*target/filter($CC3:$CJ3,$CC3:$CJ3<>"""")))))","=if($P3="""","""",
+let(target,
+ switch($AB3,
+  ""USER"",settings_aTargetNkuUSER*(1-0.1*(column(DB2)-column($CT$2))),
+  ""Gibson"",settings_aTargetNkuGibson*(1-0.1*(column(DB2)-column($CT$2))),
+  ""Ligation"",settings_aTargetNkuLigation*(1-0.1*(column(DB2)-column($CT$2)))),
+$O3-$AT3-
+sum(arrayformula($O3*target/filter($CC3:$CJ3,$CC3:$CJ3<>"""")))))","=if($P3="""","""",
+let(target,
+ switch($AB3,
+  ""USER"",settings_aTargetNkuUSER*(1-0.1*(column(DC2)-column($CT$2))),
+  ""Gibson"",settings_aTargetNkuGibson*(1-0.1*(column(DC2)-column($CT$2))),
+  ""Ligation"",settings_aTargetNkuLigation*(1-0.1*(column(DC2)-column($CT$2)))),
+$O3-$AT3-
+sum(arrayformula($O3*target/filter($CC3:$CJ3,$CC3:$CJ3<>"""")))))","=if(CT3="""","""",
+let(target,
+ switch($AB3,
+  ""USER"",settings_aTargetNkuUSER,
+  ""Gibson"",settings_aTargetNkuGibson,
+  ""Ligation"",settings_aTargetNkuLigation),
+target*(1-0.1*(xmatch(min(filter(CT3:DC3,CT3:DC3>0)),CT3:DC3)-1))))","=if($P3="""","""",
+column($W3)-column($P3)+1-countblank(P3:W3))","=if(A3<>"""",
+iferror(filter($A$3:$A,$E$3:$E<>"""",$E$3:$E=E3,$A$3:A<A3))<>"""",
+"""")","=if(E3="""",FALSE,not(iferror(match(E3,Registry!C:C,0),FALSE)))","=join("" "",P3:W3)&"" ""","=ifs(
+P3="""", ,
+$AB3=""USER"",iferror(index('dsDNA d'!$CO:$CO,xmatch(P3,dsDNA_d_ID))),
+$AB3=""Gibson"",iferror(index('dsDNA d'!$CQ:$CQ,xmatch(P3,dsDNA_d_ID))),
+$AB3=""Ligation"",iferror(index('dsDNA d'!$AD:$AD,xmatch(P3,dsDNA_d_ID))),
+TRUE,)","=ifs(
+Q3="""", ,
+$AB3=""USER"",iferror(index('dsDNA d'!$CO:$CO,xmatch(Q3,dsDNA_d_ID))),
+$AB3=""Gibson"",iferror(index('dsDNA d'!$CQ:$CQ,xmatch(Q3,dsDNA_d_ID))),
+$AB3=""Ligation"",iferror(index('dsDNA d'!$AD:$AD,xmatch(Q3,dsDNA_d_ID))),
+TRUE,)","=ifs(
+R3="""", ,
+$AB3=""USER"",iferror(index('dsDNA d'!$CO:$CO,xmatch(R3,dsDNA_d_ID))),
+$AB3=""Gibson"",iferror(index('dsDNA d'!$CQ:$CQ,xmatch(R3,dsDNA_d_ID))),
+$AB3=""Ligation"",iferror(index('dsDNA d'!$AD:$AD,xmatch(R3,dsDNA_d_ID))),
+TRUE,)","=ifs(
+S3="""", ,
+$AB3=""USER"",iferror(index('dsDNA d'!$CO:$CO,xmatch(S3,dsDNA_d_ID))),
+$AB3=""Gibson"",iferror(index('dsDNA d'!$CQ:$CQ,xmatch(S3,dsDNA_d_ID))),
+$AB3=""Ligation"",iferror(index('dsDNA d'!$AD:$AD,xmatch(S3,dsDNA_d_ID))),
+TRUE,)","=ifs(
+T3="""", ,
+$AB3=""USER"",iferror(index('dsDNA d'!$CO:$CO,xmatch(T3,dsDNA_d_ID))),
+$AB3=""Gibson"",iferror(index('dsDNA d'!$CQ:$CQ,xmatch(T3,dsDNA_d_ID))),
+$AB3=""Ligation"",iferror(index('dsDNA d'!$AD:$AD,xmatch(T3,dsDNA_d_ID))),
+TRUE,)","=ifs(
+U3="""", ,
+$AB3=""USER"",iferror(index('dsDNA d'!$CO:$CO,xmatch(U3,dsDNA_d_ID))),
+$AB3=""Gibson"",iferror(index('dsDNA d'!$CQ:$CQ,xmatch(U3,dsDNA_d_ID))),
+$AB3=""Ligation"",iferror(index('dsDNA d'!$AD:$AD,xmatch(U3,dsDNA_d_ID))),
+TRUE,)","=ifs(
+V3="""", ,
+$AB3=""USER"",iferror(index('dsDNA d'!$CO:$CO,xmatch(V3,dsDNA_d_ID))),
+$AB3=""Gibson"",iferror(index('dsDNA d'!$CQ:$CQ,xmatch(V3,dsDNA_d_ID))),
+$AB3=""Ligation"",iferror(index('dsDNA d'!$AD:$AD,xmatch(V3,dsDNA_d_ID))),
+TRUE,)","=ifs(
+W3="""", ,
+$AB3=""USER"",iferror(index('dsDNA d'!$CO:$CO,xmatch(W3,dsDNA_d_ID))),
+$AB3=""Gibson"",iferror(index('dsDNA d'!$CQ:$CQ,xmatch(W3,dsDNA_d_ID))),
+$AB3=""Ligation"",iferror(index('dsDNA d'!$AD:$AD,xmatch(W3,dsDNA_d_ID))),
+TRUE,)","=ifs(
+P3="""", ,
+$AB3=""USER"",iferror(index('dsDNA d'!$CP:$CP,xmatch(P3,dsDNA_d_ID))),
+$AB3=""Gibson"",iferror(index('dsDNA d'!$CR:$CR,xmatch(P3,dsDNA_d_ID))),
+$AB3=""Ligation"",iferror(index('dsDNA d'!$AF:$AF,xmatch(P3,dsDNA_d_ID))),
+TRUE,)","=ifs(
+Q3="""", ,
+$AB3=""USER"",iferror(index('dsDNA d'!$CP:$CP,xmatch(Q3,dsDNA_d_ID))),
+$AB3=""Gibson"",iferror(index('dsDNA d'!$CR:$CR,xmatch(Q3,dsDNA_d_ID))),
+$AB3=""Ligation"",iferror(index('dsDNA d'!$AF:$AF,xmatch(Q3,dsDNA_d_ID))),
+TRUE,)","=ifs(
+R3="""", ,
+$AB3=""USER"",iferror(index('dsDNA d'!$CP:$CP,xmatch(R3,dsDNA_d_ID))),
+$AB3=""Gibson"",iferror(index('dsDNA d'!$CR:$CR,xmatch(R3,dsDNA_d_ID))),
+$AB3=""Ligation"",iferror(index('dsDNA d'!$AF:$AF,xmatch(R3,dsDNA_d_ID))),
+TRUE,)","=ifs(
+S3="""", ,
+$AB3=""USER"",iferror(index('dsDNA d'!$CP:$CP,xmatch(S3,dsDNA_d_ID))),
+$AB3=""Gibson"",iferror(index('dsDNA d'!$CR:$CR,xmatch(S3,dsDNA_d_ID))),
+$AB3=""Ligation"",iferror(index('dsDNA d'!$AF:$AF,xmatch(S3,dsDNA_d_ID))),
+TRUE,)","=ifs(
+T3="""", ,
+$AB3=""USER"",iferror(index('dsDNA d'!$CP:$CP,xmatch(T3,dsDNA_d_ID))),
+$AB3=""Gibson"",iferror(index('dsDNA d'!$CR:$CR,xmatch(T3,dsDNA_d_ID))),
+$AB3=""Ligation"",iferror(index('dsDNA d'!$AF:$AF,xmatch(T3,dsDNA_d_ID))),
+TRUE,)","=ifs(
+U3="""", ,
+$AB3=""USER"",iferror(index('dsDNA d'!$CP:$CP,xmatch(U3,dsDNA_d_ID))),
+$AB3=""Gibson"",iferror(index('dsDNA d'!$CR:$CR,xmatch(U3,dsDNA_d_ID))),
+$AB3=""Ligation"",iferror(index('dsDNA d'!$AF:$AF,xmatch(U3,dsDNA_d_ID))),
+TRUE,)","=ifs(
+V3="""", ,
+$AB3=""USER"",iferror(index('dsDNA d'!$CP:$CP,xmatch(V3,dsDNA_d_ID))),
+$AB3=""Gibson"",iferror(index('dsDNA d'!$CR:$CR,xmatch(V3,dsDNA_d_ID))),
+$AB3=""Ligation"",iferror(index('dsDNA d'!$AF:$AF,xmatch(V3,dsDNA_d_ID))),
+TRUE,)","=ifs(
+W3="""", ,
+$AB3=""USER"",iferror(index('dsDNA d'!$CP:$CP,xmatch(W3,dsDNA_d_ID))),
+$AB3=""Gibson"",iferror(index('dsDNA d'!$CR:$CR,xmatch(W3,dsDNA_d_ID))),
+$AB3=""Ligation"",iferror(index('dsDNA d'!$AF:$AF,xmatch(W3,dsDNA_d_ID))),
+TRUE,)"

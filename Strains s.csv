@@ -1,0 +1,51 @@
+Strains s,,,,,1. Sample properties,,,,2. Queueing,,,,,,,,,,,,3. Storage,,,,,
+"=iferror(if(join("","",filter(A3:A,A3:A<>""""))<>join("","",sequence(max(A3:A))),
+""ERROR near #""&index(filter(sort(A3:A,1,TRUE),sort(A3:A,1,TRUE)<>sort(row(A3:A)-2,1,TRUE)),1)-1&""!"", 
+""Serial #""),""Serial #"")","={""ID"";arrayformula(if(A3:A<>"""",""s""&A3:A,""""))}","={if(regexmatch(settings_SampleStoragePlateSizeStrains,""b""),""Box"",""Well"");arrayformula(if(A3:A="""","""",ID_TO_WELL(settings_SampleStoragePlateSizeStrains,B3:B)))}",DNA xformed to make strain,Status,"Priority
+?",What to do with this sample?,General notes,Exclude from analysis?,Date queued,Queued by,"Plasmid name(s) (manual, comma-separated, end w/"" only"" to override formula)",Plasmid name,Organism,Strain,Resistance marker(s) (manual),Color (manual),Specific growth conditions required,Use this strain to reprep plasmid?,Certify correctly queued,Queueing validity check,Resistance marker(s),Color,Specific growth conditions,Date stored,Stored by,Strain and/or sample description (if plasmid info from Registry isn't sufficient)
+1,s1,s01.A01,,"=ifs(A3="""","""",
+,""Because strains are in cryostorage, prominently noting empty wells is more important"",
+and(D3="""",L3="""",N3="""",O3="""",Y3=""""),""currently unused (empty)"",
+
+not(T3),""certify queueing!"",
+regexmatch($G3,""⛔""),$G3,
+regexmatch($G3,""(hold)""),""wait; held"",
+
+Y3="""",if(iferror(and(D3<>"""",index(Minipreps_m_Date_inoculated_for_storage,ID_TO_INDEX(D3))<>"""")),""ready to store"",""wait to store""),
+TRUE,""OK, done"")&
+if(regexmatch(G3,""♥""),char(10)&""♥ verified"","""")&
+if(F3,"" (priority)"","""")&
+let(
+entry_list, {$L3,$N3:$O3,$T3,$Y3:$Z3},
+ifs(
+index(entry_list,1)="""","""",
+NOT(regexmatch(join(""◆"",entry_list),""[^◆]◆{2,}[^◆]"")),"""",
+true,char(10)&""missing data?""
+))","=if(A3="""","""",
+and(M3<>"""",iferror(index(Registry_Flag_as_high_priority?,xmatch(M3,Registry_Construct_name)),FALSE)))",,,,,,,"=ifs(D3="""",L3,
+and(L3="""",left(D3)<>""m""),""Enter manually!"",
+L3=""none"","""",
+regexmatch(L3,""only""),trim(substitute(L3,""only"","""")),
+left(D3)=""m"",let(plasmid_by_DNA,iferror(index(Minipreps_m_Construct_name,xmatch(D3,Minipreps_m_ID)),""???""),
+if(L3<>"""",if(plasmid_by_DNA=L3,L3,L3&"",
+""&plasmid_by_DNA),plasmid_by_DNA)),
+L3<>"""",L3,
+TRUE,""Enter manually!"")",,,,,,false,false,"=ifs(
+A3="""","""",
+T3,""Certified OK"",
+J3="""",""enter date queued!"",
+K3="""",""enter queued by!"",
+M3="""",""enter manual plasmid name(s) or 'none'!"",
+N3="""",""enter organism!"",
+O3="""",""enter strain! choose from dropdown or enter your own"",
+V3="""",""enter manual resistance marker!"",
+W3="""",""enter manual color!"",
+TRUE,""✓ No queueing errors found"")","=ifs($A3="""","""",
+P3="""",iferror(join("","",bycol(split($M3,"",
+""),lambda(x,index(Registry_Marker,xmatch(trim(x),Registry_Construct_name))))),
+""Enter manually!""),
+TRUE,P3)","=ifs(A3="""","""",
+Q3="""",iferror(index(Registry_Color,xmatch(L3,Registry_Construct_name)),iferror(index(Registry_Color,xmatch(M3,Registry_Construct_name)),"""")),
+TRUE,Q3)","=ifs(A3="""","""",
+R3="""",iferror(index(Registry_Specific_growth_condition,xmatch(M3,Registry_Construct_name)),""""),
+TRUE,R3)",,,

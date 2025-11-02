@@ -1,0 +1,367 @@
+Golden Gate g,,,,,,1. Sample properties,,,,2. Queueing,,,,,,,,,,,,,,,,,,,,,,,,,"3a. Assembly, calculated part sources",,,,,,,,,,,"3b. Assembly, actual part sources",,,,,,,,,"={""Default:"",settings_gDefaultAssemblyScale,settings_gTargetNkuGoldenGate}",10,1,"3c. Assembly, scale","3d. Assembly, calculated volumes",,,,,,,,,,,,,,"3e. Assembly, actual volumes",,,,,,,,,,,,,,,3f. Assembly,,,,,4. Transformation data,,,,,,,5. Analysis,formula-related cells >,Part rIDs,,,,,,,,,,"Part to part junction validity check (from queued rIDs, not mIDs)",,,,,,,,,,mID-rID correspondence check,,,,,,,,,,Part stock concentrations in nkµ:,,,,,,,,,,Final part concentrations in assembly (nkµ):,,,,,,,,,,,,
+"=iferror(if(join("","",filter(A3:A,A3:A<>""""))<>join("","",sequence(max(A3:A))),
+""ERROR near #""&index(filter(sort(A3:A,1,TRUE),sort(A3:A,1,TRUE)<>sort(row(A3:A)-2,1,TRUE)),1)-1&""!"", 
+""Serial #""),""Serial #"")","={""ID"";arrayformula(if(A3:A<>"""",""g""&A3:A,""""))}","={if(regexmatch(settings_SampleStoragePlateSize,""b""),""Box"",""Well"")&if(settings_gStoreInPlates?,"""",char(10)&""(not used)"")
+;arrayformula(if(A3:A="""","""",ID_TO_WELL(settings_SampleStoragePlateSize,B3:B)))}",Sort #,Construct name,Status,"Priority
+?",What to do with this sample?,General notes,Exclude from analysis?,Date  queued,Queued by,Queue notes,Part 1,Part 2,Part 3,Part 4,Part 5,Part 6,Part 7,Part 8,Part 9,Part 10,Hold?,='Transformations t'!K2,='Transformations t'!L2,Certify correctly queued,Queueing validity check,Enzyme,={CX2:CX},Marker,Color,Parts & mIDs track record,Parts with same resistance as final construct,Parts with same color as final construct,Parts source calculation,Part 1 source calc.,Part 2 source calc.,Part 3 source calc.,Part 4 source calc.,Part 5 source calc.,Part 6 source calc.,Part 7 source calc.,Part 8 source calc.,Part 9 source calc.,Part 10 source calc.,Part 1 source,Part 2 source,Part 3 source,Part 4 source,Part 5 source,Part 6 source,Part 7 source,Part 8 source,Part 9 source,Part 10 source,Scale (µL),Target nkµ,Overqueued part(s)?,Volume calculation,"=""µL ""&settings_gLigaseName&"" calc.""",µL RE calc.,"=""µL ""&settings_gLigaseBufferName&"" calc.""",µL 1 calc.,µL 2 calc.,µL 3 calc.,µL 4 calc.,µL 5 calc.,µL 6 calc.,µL 7 calc.,µL 8 calc.,µL 9 calc.,µL 10 calc.,"=""µL ""&settings_gLigaseName",µL RE,"=""µL ""&settings_gLigaseBufferName",µL 1,µL 2,µL 3,µL 4,µL 5,µL 6,µL 7,µL 8,µL 9,µL 10,µL water,Actual part concs (ng/kb/µL),Date assembled,Assembled by,Assembly notes,Thermal cycling program,Thermocycler block used,Marker,Latest transformation ID,Latest date transformed,Date plates scored,"={""Transformation information"";
+byrow(CQ3:CQ,
+lambda(tID,
+if(tID="""","""",
+trim(iferror(
+let(input_data,transpose(index({Transformations_Comp_cell_procedure,Transformations_Comp_cell_source,Transformations_Colony_counts,Transformations_Colony_sizes,Transformations_Colors,Transformations_Score_notes},
+ID_TO_INDEX(tID))),
+filtered_input_data,filter(input_data,input_data<>""""),
+join("" / "",filtered_input_data)
+))))))}","={""Transformation status"";byrow(CQ3:CQ,
+lambda(tID,
+if(tID="""","""",
+index(Transformations_Status,ID_TO_INDEX(tID)))
+))}",Expected Color,Successful GG? (manually whitelist all parts?),Duplicate(s),Part 1,Part 2,Part 3,Part 4,Part 5,Part 6,Part 7,Part 8,Part 9,Part 10,Part 1,Part 2,Part 3,Part 4,Part 5,Part 6,Part 7,Part 8,Part 9,Part 10,Part 1,Part 2,Part 3,Part 4,Part 5,Part 6,Part 7,Part 8,Part 9,Part 10,Part 1,"=""Part ""&column(ED2)-column(EC$2)+1","=""Part ""&column(EE2)-column(EC$2)+1","=""Part ""&column(EF2)-column(EC$2)+1","=""Part ""&column(EG2)-column(EC$2)+1","=""Part ""&column(EH2)-column(EC$2)+1","=""Part ""&column(EI2)-column(EC$2)+1","=""Part ""&column(EJ2)-column(EC$2)+1","=""Part ""&column(EK2)-column(EC$2)+1","=""Part ""&column(EL2)-column(EC$2)+1",Part 1,"=""Part ""&column(EN2)-column(EM$2)+1","=""Part ""&column(EO2)-column(EM$2)+1","=""Part ""&column(EP2)-column(EM$2)+1","=""Part ""&column(EQ2)-column(EM$2)+1","=""Part ""&column(ER2)-column(EM$2)+1","=""Part ""&column(ES2)-column(EM$2)+1","=""Part ""&column(ET2)-column(EM$2)+1","=""Part ""&column(EU2)-column(EM$2)+1","=""Part ""&column(EV2)-column(EM$2)+1",Parts mIDs,Whitelisted rIDs /\ \/,Whitelisted mIDs /\ \/
+1,g1,g01.A01,,,"=let(output,ifs(
+$A3="""","""",
+not(AA3),""certify queueing!"",
+regexmatch(H3,""⛔""),H3,
+regexmatch(index(Registry_Status,xmatch(E3,Registry_Construct_name)),""[Aa]bandon""),""construct abandoned"",
+regexmatch(index(Registry_Status,xmatch(E3,Registry_Construct_name)),""[Hh]eld""),""wait; construct held"",
+regexmatch(index(Registry_Status,xmatch(E3,Registry_Construct_name)),""[Cc]omplete""),""construct completed"",
+
+CK3="""",
+ let(calc_parts,join("","",AK3:AT3),
+ ifs(
+ and(CI3<>"""",CI3<-0.3),""negative water volume! revise"",
+ regexmatch(calc_parts,""\!""),""part problem!"",
+ regexmatch(calc_parts,""not""),""wait - part(s) incomplete"",
+ regexmatch(calc_parts,""need stock""),""wait - part(s) need new stock"",
+ regexmatch(calc_parts,""need inoc""),""wait - part(s) need miniprep inoculated"",
+ regexmatch(calc_parts,""need conc""),""wait - part(s) need concentration determined"",
+ regexmatch(calc_parts,""held""),""wait - part(s) held"",
+ regexmatch(H3,""(hold)""),""held"",
+ countblank(AU3:BD3)<>countblank(CY3:DH3),""ready to assemble: enter mIDs to use"",
+ countblank(BV3:CH3)<>countblank(CY3:DH3),""ready to assemble: enter volumes to use"",
+
+ not(and(DS3:EB3)),""INVALID mID!""&join("" "",byrow(filter(AU3:BD3,DS3:EB3=FALSE),lambda(row,row&""=""&index(Registry_GG_parts_display_name,xmatch(index(Minipreps_m_Construct_name,xmatch(row,Minipreps_m_ID)),Registry_Construct_name)))))&""
+""&
+if(and(byrow(filter(AU3:BD3,DS3:EB3=FALSE),lambda(row,
+let(ActualmIDConstructName,index(Minipreps_m_Construct_name,xmatch(row,Minipreps_m_ID)),
+and(
+index(Registry_5_overhang,xmatch(ActualmIDConstructName,Registry_Construct_name))=index(Registry_5_overhang,xmatch(DE3,Registry_ID)),
+index(Registry_3_overhang,xmatch(ActualmIDConstructName,Registry_Construct_name))=index(Registry_3_overhang,xmatch(DE3,Registry_ID))))))),
+""junctions remain valid"",""INVALID junctions""),
+ TRUE,""ready to assemble""&
+  if(and(counta(EM3:EV3)<>0,countif(EM3:EV3,""<""&settings_gMinNkuGG)>0),""; part final concentration low!"","""")))&if(BG3<>"""",char(10)&BG3,""""),
+
+regexmatch(H3,""(hold)""),""held"",
+CR3="""",
+ ifs(
+  value(text(today(),""yymmdd""))-value(CK3)<settings_gWaitTimeBeforeTransforming,""currently assembling"",
+  regexmatch(H3,""don't transform""),""transformation manually held"",
+  sum(iferror(arrayformula(value(split(textjoin("", "",TRUE,filter(Transformations_Transformed_amount,Transformations_Source_ID=B3)),"",""))),0))>=BE3,""ran out!"",
+  iferror(regexmatch(index(Transformations_What_to_do_with_this, max(filter(row(Transformations_Source_ID), Transformations_Source_ID=B3))),""⛔"")),""Recent instance of transformation has been manually terminated - check Transformations sheet?"",
+  TRUE,""ready to transform""),
+
+FALSE,""bulky addition of volume check for retransformations"",
+and(regexmatch(H3,""(retransform)""),counta(iferror(filter(Transformations_Source_ID,Transformations_Source_ID=B3,Transformations_Date_transformed<>"""")))<2),if(
+  and(BE3<>"""",sum(iferror(arrayformula(value(split(textjoin("", "",TRUE,filter(Transformations_Transformed_amount,Transformations_Source_ID=B3)),"", ""))),0))>=BE3),""ran out!"",""ready to transform""&char(10)&""(repeat)""),
+counta(iferror(filter(Transformations_Source_ID,Transformations_Source_ID=B3,Transformations_Date_transformed="""")))>0,if(
+  and(BE3<>"""",sum(iferror(arrayformula(value(split(textjoin("", "",TRUE,filter(Transformations_Transformed_amount,Transformations_Source_ID=B3)),"", ""))),0))>=BE3),""ran out!"",""ready to transform""&char(10)&""(repeat)""),
+
+and(CS3="""",iferror(not(regexmatch(index(Transformations_What_to_do_with_this,xmatch(B3,Transformations_Source_ID)),""⛔"")),FALSE)),if(
+  value(text(today(),""yymmdd""))-value(CR3)>0,""score plates (on Transformations)"",""score plates tomorrow (transformed today)""),
+
+FALSE,""Next line probably redundant once we decide where in Status to stop work on completed constructs"",
+regexmatch(index(Registry_Status,xmatch(E3,Registry_Construct_name)),""[Cc]omplete""),""done; construct complete"",
+
+counta(iferror(filter(Minipreps_m_Source_ID,(Minipreps_m_Source_ID=B3)+(Minipreps_m_Source_of_tID=B3),regexmatch(Minipreps_m_Status,""ready to inoculate""))))>0,
+  counta(iferror(filter(Minipreps_m_Source_ID,(Minipreps_m_Source_ID=B3)+(Minipreps_m_Source_of_tID=B3),regexmatch(Minipreps_m_Status,""ready to inoculate""))))&"" minipreps queued"",
+FALSE,""If no miniprep from the most recent transformation has been completed without failing, call for queueing minipreps, unless we can't"",
+counta(iferror(filter(Minipreps_m_Source_ID,(Minipreps_m_Source_ID=B3)+(Minipreps_m_Source_of_tID=B3),not(regexmatch(Minipreps_m_Status,""([Ff]ail)|(stalled)"")),Minipreps_m_Date_purified>CS3)))=0,
+   if(regexmatch(CU3,""(don't)|(can't)|(no correct colonies)|(no colonies!)|⛔""),""transformed; stalled (can't queue minipreps)"",
+     if(and(settings_AnalyticalPCRgIDRequireQueueingAfterTransformation,regexmatch(CU3,""PCR"")),""waiting for analytical PCR"",""ready to queue miniprep"")),
+TRUE,""done"")&
+if(G3,"" (priority)"","""")&
+if(regexmatch(Lookup_lists_and_tabulations_Verified_mID_Sources,"",""&B3&"",""),char(10)&""♥ good mID"",""""),
+if(or(regexmatch(output,""ran out!""),regexmatch(output,""abandoned""),CK3=""""),output,output&if(sum(iferror(arrayformula(value(split(textjoin("", "",TRUE,filter(Transformations_Transformed_amount,Transformations_Source_ID=B3)),"", ""))),0))>=BE3,if(or(BE3="""",A3=""""),"""",char(10)&""ran out!""),"""")))&
+let(
+entry_list, {$K3:$L3,$N3,$AA3,$AU3,$BE3:$BF3,$BV3,$CK3:$CL3,$CN3:$CO3},
+iferror(ifs(
+index(entry_list,1)="""","""",
+NOT(regexmatch(join(""◆"",entry_list),""[^◆]◆{2,}[^◆]"")),"""",
+true,char(10)&""missing data?""
+)))","=if(A3="""","""",
+iferror(and(B3<>"""",regexmatch(Registry_Priority_flagged_IDs,B3&"",""))))",,,,,,,,,,,,,,,,,,,,,"=ifs(
+A3="""","""",
+AA3,""Certified OK"",
+E3="""",""enter construct name!"",
+N3="""",""enter parts!"",
+iserror(xmatch(E3,Registry_Construct_name)),""construct not registered!"",
+regexmatch(index(Registry_Status,xmatch(E3,Registry_Construct_name)),""[Dd]uplicate""), ""duplicate construct! ""&index(Registry_Status, xmatch(E3,Registry_Construct_name)),
+regexmatch(index(Registry_Status,xmatch(E3,Registry_Construct_name)),""held""),""wait; construct held"",
+TRUE,iferror(if(and(DI3:DR3),""✓ Valid junctions, no problems found"",""INVALID junctions!"")))","=if(CY3="""","""",
+iferror(index(Registry_GG_enzyme,xmatch(CY3,Registry_ID))))",,"=if($E3="""","""",
+index(Registry_Marker,xmatch($E3,Registry_Construct_name)))","=if($E3="""","""",
+index(Registry_Color,xmatch($E3,Registry_Construct_name)))","=if(A3="""","""",
+let(
+total_parts,counta(iferror(filter($CY3:$DH3,$CY3:$DH3<>""""))),
+mIDs_entered,counta(iferror(filter($AU3:$BD3,$AU3:$BD3<>""""))),
+rID_success,reduce(0,CY3:DH3,lambda(total,x,if(x="""",total,if(regexmatch(Registry_List_of_whitelisted_rIDs_from_Golden_Gate,"",""&x&"",""),total+1,total)))),
+mID_success,reduce(0,AU3:BD3,lambda(total,x,if(x="""",total,if(regexmatch(Registry_List_of_whitelisted_mIDs_from_Golden_Gate,"",""&x&"",""),total+1,total)))),
+if(mIDs_entered<>total_parts,rID_success&"" / ""&total_parts&char(10)&""parts worked before"",
+rID_success&"" / ""&total_parts&char(10)&""parts worked before""&char(10)&
+mID_success&"" / ""&total_parts&char(10)&""mIDs worked before (blue color)"")))","=if(A3="""","""",
+trim(join(""
+"",
+bycol(CY3:DH3,lambda(col,ifs(
+col="""","""",
+regexmatch(index(Registry_Marker,ID_TO_INDEX(col)),AE3),index(Registry_Construct_name,ID_TO_INDEX(col)),
+TRUE,"""")))))
+)","=if(A3="""","""",
+trim(join(""
+"",
+bycol(CY3:DH3,lambda(col,ifs(
+col="""","""",
+regexmatch(index(Registry_Color,ID_TO_INDEX(col)),AF3),index(Registry_Construct_name,ID_TO_INDEX(col)),
+TRUE,"""")))))
+)","=if(A3="""","""",
+{""Calculated part sources:"",
+bycol(N3:W3,lambda(part,
+if(or(part="""",part=""(construct complete)"",$CK3<>""""),"""",
+ let(rID_posn,iferror(ID_TO_INDEX(trim(regexextract(part,""(^r\d+ )|(>+r\d+)""))),FALSE),
+ if(
+  not(rID_posn),""part error!"",
+  let(status,lower(index(Registry_Status,rID_posn)),
+  ifs(
+   regexmatch(status,""queued""),""not cloned"",
+   regexmatch(status,""abandon""),""abandoned!"",
+   regexmatch(status,""held""),""held"",
+   regexmatch(status,""wait on stock""),""need stock"",
+   regexmatch(status,""complete|not construct""),
+    let(stock_ID,index(Registry_Stock_to_use_for_GG,rID_posn),
+      if(and(stock_ID<>"""",index(Registry_Stock_to_use_for_GG_Conc,rID_posn)=""""),
+        ifs(
+          index(Minipreps_m_Date_inoculated,ID_TO_INDEX(stock_ID))="""",stock_ID&char(10)&""need inoc"",
+          index(Minipreps_m_Date_purified,ID_TO_INDEX(stock_ID))="""",stock_ID&char(10)&""need prep"",
+          TRUE,stock_ID&char(10)&""need conc""),
+        if(stock_ID="""",""need stock"",stock_ID))),
+   TRUE,""""
+)))))))
+})",,,,,,,,,,,,,,,,,,,,,,,"=ifs(
+A3="""","""",
+CK3<>"""","""",
+TRUE,
+trim(join(char(10),bycol(AK3:AT3,
+lambda(x,
+iferror(ifs(
+x="""",,
+left(x)=""m"",let(vol_queued,index('(Lookup lists & tabulations)'!$Q$3:$Q,xmatch(x,'(Lookup lists & tabulations)'!$P$3:$P)),vol_available,index('Minipreps m'!$O$3:$O,xmatch(x,'Minipreps m'!$B$3:$B)),
+ ifs(
+  vol_available<settings_mMinVolumeLeft,x&"" ran out!"",
+  vol_queued>vol_available-settings_mMinVolumeLeft,x&"" overqueued!"",
+  vol_queued>vol_available-settings_mWarnVolumeLeft,x&"" nearly overqueued?"",
+  TRUE,)),
+left(x)=""d"",let(vol_queued,index('(Lookup lists & tabulations)'!$Q$3:$Q,xmatch(x,'(Lookup lists & tabulations)'!$P$3:$P)),vol_available,index('dsDNA d'!$L$3:$L,xmatch(x,'dsDNA d'!$B$3:$B)),
+ ifs(
+  vol_available<settings_dMinVolumeToStillUse,x&"" ran out!"",
+  vol_queued>vol_available-settings_dMinVolumeToStillUse,x&"" overqueued!"",
+  vol_queued>vol_available-settings_dMinVolumeWarn,x&"" nearly overqueued?"",
+  TRUE,)),
+TRUE,)))))))","=if(or(A3="""",CK3<>"""",regexmatch(H3,""(hold)"")),"""",
+if(BE3="""",""Set scale!"",
+if(BF3="""",""Set target nkµ!"",
+let(vols,
+{settings_gDefaultLigaseVol/settings_gDefaultAssemblyScale*BE3,
+settings_gDefaultREVol/settings_gDefaultAssemblyScale*BE3,
+settings_gDefaultBufferVol/settings_gDefaultAssemblyScale*BE3,
+arrayformula(iferror($BE3*$BF3/EC3:EL3,""""))},
+{""Calculated:"",vols}))))",,,,,,,,,,,,,,,,,,,,,,,,,,,"=let(water,BE3-sum(BV3:CH3),
+if(abs(water)<0.1,"""",water))","=if(BY3="""","""",
+""avg ""&text(average(EM3:EV3),""0.0"")&char(10)&
+""min ""&text(min(EM3:EV3),""0.0"")&char(10)&
+""max ""&text(max(EM3:EV3),""0.0""))",,,,,,=AE3,"=if(A3="""","""",
+let(
+IDs,filter(Transformations_ID,Transformations_Source_ID=B3),
+dates,filter(Transformations_Date_transformed,Transformations_Source_ID=B3),
+if(iferror(or(len(dates)=0,dates=""""),TRUE),"""",if(countblank(dates)>0,"""",index(IDs,xmatch(max(dates),dates))))
+))","=if(CQ3="""","""",
+index(Transformations_Date_transformed,ID_TO_INDEX(CQ3)))","=if(CQ3="""","""",
+index(Transformations_Date_scored,ID_TO_INDEX(CQ3)))",,,=AF3,,"=if(A3="""","""",
+trim(join(char(10),
+byrow(
+sort(
+iferror(filter($A$3:$A,$E$3:$E<>"""",$E$3:$E=E3,$B$3:B<>B3),""""),
+1,FALSE
+),
+lambda(r,if(r<>"""",join("" "",r,substitute(index(F$3:F,r),char(10),"" "")),""""))
+))))","=if(or(N3="""",N3=""(construct complete)""),"""",
+if(regexmatch(N3,""^r\d+ ""),
+index(split(N3,"" ""),1),
+index(split(N3,"">""),2)))","=if(or(O3="""",O3=""(construct complete)""),"""",
+if(regexmatch(O3,""^r\d+ ""),
+index(split(O3,"" ""),1),
+index(split(O3,"">""),2)))","=if(or(P3="""",P3=""(construct complete)""),"""",
+if(regexmatch(P3,""^r\d+ ""),
+index(split(P3,"" ""),1),
+index(split(P3,"">""),2)))","=if(or(Q3="""",Q3=""(construct complete)""),"""",
+if(regexmatch(Q3,""^r\d+ ""),
+index(split(Q3,"" ""),1),
+index(split(Q3,"">""),2)))","=if(or(R3="""",R3=""(construct complete)""),"""",
+if(regexmatch(R3,""^r\d+ ""),
+index(split(R3,"" ""),1),
+index(split(R3,"">""),2)))","=if(or(S3="""",S3=""(construct complete)""),"""",
+if(regexmatch(S3,""^r\d+ ""),
+index(split(S3,"" ""),1),
+index(split(S3,"">""),2)))","=if(or(T3="""",T3=""(construct complete)""),"""",
+if(regexmatch(T3,""^r\d+ ""),
+index(split(T3,"" ""),1),
+index(split(T3,"">""),2)))","=if(or(U3="""",U3=""(construct complete)""),"""",
+if(regexmatch(U3,""^r\d+ ""),
+index(split(U3,"" ""),1),
+index(split(U3,"">""),2)))","=if(or(V3="""",V3=""(construct complete)""),"""",
+if(regexmatch(V3,""^r\d+ ""),
+index(split(V3,"" ""),1),
+index(split(V3,"">""),2)))","=if(or(W3="""",W3=""(construct complete)""),"""",
+if(regexmatch(W3,""^r\d+ ""),
+index(split(W3,"" ""),1),
+index(split(W3,"">""),2)))","=if(or(CY3="""",CZ3=""""),"""",
+and(
+index(Registry_3_overhang,xmatch(choosecols(CY3:DH3,column(DH3)-column(CY3)-countblank(CY3:DH3)+1),Registry_ID))=
+index(Registry_5_overhang,xmatch(CY3,Registry_ID))
+,
+index(Registry_3_overhang,xmatch(CY3,Registry_ID))=
+index(Registry_5_overhang,xmatch(CZ3,Registry_ID))))","=if(or(CZ3="""",DA3=""""),"""",
+index(Registry_3_overhang,xmatch(CZ3,Registry_ID))=
+index(Registry_5_overhang,xmatch(DA3,Registry_ID)))","=if(or(DA3="""",DB3=""""),"""",
+index(Registry_3_overhang,xmatch(DA3,Registry_ID))=
+index(Registry_5_overhang,xmatch(DB3,Registry_ID)))","=if(or(DB3="""",DC3=""""),"""",
+index(Registry_3_overhang,xmatch(DB3,Registry_ID))=
+index(Registry_5_overhang,xmatch(DC3,Registry_ID)))","=if(or(DC3="""",DD3=""""),"""",
+index(Registry_3_overhang,xmatch(DC3,Registry_ID))=
+index(Registry_5_overhang,xmatch(DD3,Registry_ID)))","=if(or(DD3="""",DE3=""""),"""",
+index(Registry_3_overhang,xmatch(DD3,Registry_ID))=
+index(Registry_5_overhang,xmatch(DE3,Registry_ID)))","=if(or(DE3="""",DF3=""""),"""",
+index(Registry_3_overhang,xmatch(DE3,Registry_ID))=
+index(Registry_5_overhang,xmatch(DF3,Registry_ID)))","=if(or(DF3="""",DG3=""""),"""",
+index(Registry_3_overhang,xmatch(DF3,Registry_ID))=
+index(Registry_5_overhang,xmatch(DG3,Registry_ID)))","=if(or(DG3="""",DH3=""""),"""",
+index(Registry_3_overhang,xmatch(DG3,Registry_ID))=
+index(Registry_5_overhang,xmatch(DH3,Registry_ID)))","=if(or(DH3="""",DI3=""""),"""",
+index(Registry_3_overhang,xmatch(DH3,Registry_ID))=
+index(Registry_5_overhang,xmatch(DI3,Registry_ID)))","=bycol({AU3:BD3;CY3:DH3},
+lambda(col,
+let(mID,index(col,1),rID,index(col,2),
+ifs(
+mID="""","""",
+left(mID)<>""m"","""",
+TRUE,
+index(Minipreps_m_Construct_name,ID_TO_INDEX(mID))
+ =
+index(Registry_Construct_name,ID_TO_INDEX(rID))))))",,,,,,,,,,"=iferror(
+
+if(or(N3="""",N3=""(construct complete)""),"""",
+switch(left(AU3),
+""m"",index(Minipreps_m_Conc_nku,xmatch(AU3,Minipreps_m_ID)),
+index(Registry!$BE:$BE,xmatch(AU3,Registry_Stock_to_use_for_GG)))),
+
+"""")","=iferror(
+
+if(or(O3="""",O3=""(construct complete)""),"""",
+switch(left(AV3),
+""m"",index(Minipreps_m_Conc_nku,match(AV3,Minipreps_m_ID,0)),
+index(Registry!$BE:$BE,match(AV3,Registry!$BD:$BD,0)))),
+
+"""")","=iferror(
+
+if(or(P3="""",P3=""(construct complete)""),"""",
+switch(left(AW3),
+""m"",index(Minipreps_m_Conc_nku,match(AW3,Minipreps_m_ID,0)),
+index(Registry!$BE:$BE,match(AW3,Registry!$BD:$BD,0)))),
+
+"""")","=iferror(
+
+if(or(Q3="""",Q3=""(construct complete)""),"""",
+switch(left(AX3),
+""m"",index(Minipreps_m_Conc_nku,match(AX3,Minipreps_m_ID,0)),
+index(Registry!$BE:$BE,match(AX3,Registry!$BD:$BD,0)))),
+
+"""")","=iferror(
+
+if(or(R3="""",R3=""(construct complete)""),"""",
+switch(left(AY3),
+""m"",index(Minipreps_m_Conc_nku,match(AY3,Minipreps_m_ID,0)),
+index(Registry!$BE:$BE,match(AY3,Registry!$BD:$BD,0)))),
+
+"""")","=iferror(
+
+if(or(S3="""",S3=""(construct complete)""),"""",
+switch(left(AZ3),
+""m"",index(Minipreps_m_Conc_nku,match(AZ3,Minipreps_m_ID,0)),
+index(Registry!$BE:$BE,match(AZ3,Registry!$BD:$BD,0)))),
+
+"""")","=iferror(
+
+if(or(T3="""",T3=""(construct complete)""),"""",
+switch(left(BA3),
+""m"",index(Minipreps_m_Conc_nku,match(BA3,Minipreps_m_ID,0)),
+index(Registry!$BE:$BE,match(BA3,Registry!$BD:$BD,0)))),
+
+"""")","=iferror(
+
+if(or(U3="""",U3=""(construct complete)""),"""",
+switch(left(BB3),
+""m"",index(Minipreps_m_Conc_nku,match(BB3,Minipreps_m_ID,0)),
+index(Registry!$BE:$BE,match(BB3,Registry!$BD:$BD,0)))),
+
+"""")","=iferror(
+
+if(or(V3="""",V3=""(construct complete)""),"""",
+switch(left(BC3),
+""m"",index(Minipreps_m_Conc_nku,match(BC3,Minipreps_m_ID,0)),
+index(Registry!$BE:$BE,match(BC3,Registry!$BD:$BD,0)))),
+
+"""")","=iferror(
+
+if(or(W3="""",W3=""(construct complete)""),"""",
+switch(left(BD3),
+""m"",index(Minipreps_m_Conc_nku,match(BD3,Minipreps_m_ID,0)),
+index(Registry!$BE:$BE,match(BD3,Registry!$BD:$BD,0)))),
+
+"""")","=iferror(
+
+if(EC3<>"""",EC3*BY3/$BE3,""""),
+
+"""")","=iferror(
+
+if(ED3<>"""",ED3*BZ3/$BE3,""""),
+
+"""")","=iferror(
+
+if(EE3<>"""",EE3*CA3/$BE3,""""),
+
+"""")","=iferror(
+
+if(EF3<>"""",EF3*CB3/$BE3,""""),
+
+"""")","=iferror(
+
+if(EG3<>"""",EG3*CC3/$BE3,""""),
+
+"""")","=iferror(
+
+if(EH3<>"""",EH3*CD3/$BE3,""""),
+
+"""")","=iferror(
+
+if(EI3<>"""",EI3*CE3/$BE3,""""),
+
+"""")","=iferror(
+
+if(EJ3<>"""",EJ3*CF3/$BE3,""""),
+
+"""")","=if(EK3<>"""",EK3*CG3/$BE3,"""")","=if(EL3<>"""",EL3*CH3/$BE3,"""")","=trim(join("" "",AU3:BD3))","=if(or(A3="""",CK3=""""),"""",
+if(or($CW3,regexmatch($F3,""♥"")),
+join("","",unique(CY3:DH3,TRUE,FALSE))
+,"""")
+)","=if(or(A3="""",CK3=""""),"""",
+if(or($CW3,regexmatch($F3,""♥"")),
+join("","",unique(AU3:BD3,TRUE,FALSE))
+,"""")
+)"

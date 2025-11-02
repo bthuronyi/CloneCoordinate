@@ -1,0 +1,218 @@
+dsDNA d,,,,,1. Sample properties,,,,,,,"2a. Queueing, general",,,,"2b. Queueing, PCR/anneal",,,"={""Default:"",
+settings_dPCRDefaultCycleCount,
+settings_dPCRDefaultPolymerase,
+settings_dPCRDefaultVariation,
+settings_dPCRDefaultAnnealTemp,
+"""",
+settings_dPCRDefaultScale}",30,Q5U,Standard,63,,50,"2c. Queueing, digest",,,,,,,,,"2d. Queueing, general cont'd.",,,,,,,,3. Mixing and incubation,,,,,,,,,"={""Default:"",settings_dDefaultCleanupMethod,settings_dDefaultElutionVolume}","Econospin columns, lab buffers",50,4. Cleanup and storage,,5. Quantitation,,,,,,6a. Gel prep & run,,,,6b. Gel coding,,,,,,,,,7. Primer analysis,,,,used by formulas >,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+"=iferror(if(join("","",filter(A3:A,A3:A<>""""))<>join("","",sequence(max(A3:A))),
+""ERROR near #""&index(filter(sort(A3:A,1,TRUE),sort(A3:A,1,TRUE)<>sort(row(A3:A)-2,1,TRUE)),1)-1&""!"", 
+""Serial #""),""Serial #"")","={""ID"";arrayformula(if(A3:A<>"""",""d""&A3:A,""""))}","={if(regexmatch(settings_SampleStoragePlateSize,""b""),""Box"",""Well"");arrayformula(if(A3:A="""","""",ID_TO_WELL(settings_SampleStoragePlateSize,B3:B)))}",Sort #,Status,"Priority
+?",What to do with this sample?,General notes,Exclude from analysis?,Manual vol used adjust (µL),Volume used,Volume left (est.),Date queued,Queued by,Queue notes,Type,Oligo 1,Oligo 2,PCR template DNA (m/o/d/r/s),"Fragment sequence (primer to primer, from map)",# of cycles,Polymerase,Variation / additives,Anneal temp (ºC),Required elong (s),Scale (µL),Digest type,DNA to digest (m/d/o),Amount to digest (ng),Enzyme 1,Enzyme vol (µL),Enzyme 2,Enzyme 2 vol (µL),Buffer,"Fragment sequence (from plasmid map) to assemble, overhang to overhang",Quant priority,Gel priority,Certify correctly queued,Queueing validity check,Fragment sequence,Size (kb),={CD2:CD},={CF2:CF},={CG2:CG},Actual input DNA vol for digest (µL),Date mixed & incubated,Mixed / incubated by,Thermocycler block or incubator used,Actual input DNA source used,Actual elong (m:ss),Actual anneal (ºC),Actual incubation (hrs),Notes / misc conditions,Cleanup method,Elution volume (µL),Date finished (in d plate),Cleaned up by,Date quant,Quant by,Quant method,A260/ A280,A260/ A230,Conc (ng/µL),Date gel sample prepped,Gel sample prep by,Date gel run,Gel by,Date gel coded,Gel coded by,Gel band information,Gel intensity (main/desired band),Gel ladder,Gel nearest ladder band (kb),={AO2:AO},Gel size interpretation (main/desired band),Gel notes,Secondary structure prediction - temperature (ºC),Secondary structure prediction - min ΔG homodimer (oligo 1),Secondary structure prediction - min ΔG homodimer (oligo 2),Secondary structure prediction - min ΔG heterodimer,Part of any assembly that generated a verified m?,Assemblies using this fragment,dsDNA identifier for duplicate search #1,Duplicate(s),Calculated input DNA vol for digest (µL),QC done?,ng/µL (actual or guess),nkµ (actual or guess),Oligo 1 sequence,Oligo 2 sequence,Oligo 1 reverse complement,Oligo 2 reverse complement,"Left junction sequence (5'>3', only 3' overhangs currently supported)","Right junction sequence (5'>3', only 3' overhangs currently supported)",Left fragment end for Gibson assembly,Right fragment end for Gibson assembly,Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max)
+1,d1,d01.A01,,"=ifs(
+A3="""","""",
+not(AL3),""certify queueing!"",
+regexmatch($G3,""⛔""),$G3,
+regexmatch($G3,""(hold)""),""wait; held"",
+
+$AT3<>"""",
+  if(BD3="""",if(P3=""anneal"",""ready to dilute & store"",""ready to clean up""),
+     if(and(P3=""PCR"",BK3<>"""",BK3<settings_QCLowPCRConcCutoff),""Failed: low conc! ⛔"",
+        if(and(P3=""digest"",BK3<>"""",BK3<settings_QCLowDigestConcCutoff),""Failed: low conc! ⛔"",
+           if(L3<=settings_dMinVolumeToStillUse,""Ran out ⛔"",""done""&
+           if(and(BF3="""",or(settings_QCAnnealGelQuant?,P3<>""anneal""),iferror(xmatch(AJ3,'Settings & admin'!$BK$35:$BK$41),1.5)>='Settings & admin'!$BK$28),char(10)&""ready to quant"","""")&
+           if(and(BL3="""",or(settings_QCAnnealGelQuant?,P3<>""anneal""),iferror(xmatch(AK3,'Settings & admin'!$BK$35:$BK$41),1.5)>='Settings & admin'!$BK$26),char(10)&""ready to prep gel sample"","""")&
+           if(and(BL3<>"""",BN3=""""),char(10)&""ready to run gel"","""")&
+           if(and(BN3<>"""",BP3=""""),char(10)&""ready to code gel"","""")&
+           if(and(L3<=settings_dMinVolumeWarn,L3>settings_dMinVolumeToStillUse),char(10)&""vol low?"",""""))&
+           ifs(
+             and(P3=""PCR"",BK3<>"""",BK3<settings_QCLowPCRConcWarn),char(10)&""low conc?"",
+             and(P3=""digest"",BK3<>"""",BK3<settings_QCLowDigestConcWarn),char(10)&""low conc?"",
+             TRUE,"""")&
+           if(CC3=""yes"",char(10)&""assembly success ♥"","""")&
+           if(or(and(regexmatch(BR3,""No band""),BK3<settings_QCLowPCRConcWarn),regexmatch(BR3,""Primer dimer""),regexmatch(BR3,""Smear""),regexmatch(BW3,""Larger than expected""),regexmatch(BW3,""Smaller than expected"")),
+             char(10)&""gel problem?"","""")
+  ))),
+
+iferror(regexmatch(index(Oligos_o_Status,xmatch(Q3,Oligos_o_ID)),""⛔""),FALSE),""oligo 1 is lost/abandoned!"",
+iferror(regexmatch(index(Oligos_o_Status,xmatch(R3,Oligos_o_ID)),""⛔""),FALSE),""oligo 2 is lost/abandoned!"",
+
+and(P3<>""digest"",or(isblank(index(Oligos_o_Stocks_made,xmatch(Q3,Oligos_o_ID))),isblank(index(Oligos_o_Stocks_made,xmatch(R3,Oligos_o_ID))))),""wait; need o"",
+P3=""anneal"",""ready to set up"",
+
+FALSE,""Check that the PCR template or digest input DNA is available and valid"",
+TRUE,
+let(input_dna,if(P3=""PCR"",S3,AB3),
+let(status,iferror(lower(if(regexmatch(input_dna,""^\D\d+$""),
+ switch(left(input_dna),
+ ""m"",iferror(index(Minipreps_m_Status,xmatch(input_dna,Minipreps_m_ID)),""error""),
+ ""o"",iferror(index(Oligos_o_Status,xmatch(input_dna,Oligos_o_ID)),""error""),
+ ""d"",iferror(index(dsDNA_d_Status,xmatch(input_dna,dsDNA_d_ID)),""error""),
+ ""r"",iferror(index(Registry_Status,xmatch(input_dna,Registry_ID)),""error""),
+ ""s"",iferror(index(Strains_s_Status,xmatch(input_dna,Strains_s_ID)),""error"")),
+ index(Registry_Status,xmatch(input_dna,Registry_Construct_name)))),""error""),
+ ifs(
+  status=""error"",""input DNA/template not found!"", 
+  regexmatch(status,""[Aa]bandon""),""template abandoned!"",
+  regexmatch(status,""hold""),""template held?"",
+  not(regexmatch(status,""(done)|([Cc]omplete)"")),let(dna_type,if(P3=""digest"",""input DNA"",""template""),if(regexmatch(status,""⛔""),dna_type&"" failed! ⛔"",""wait; need ""&dna_type)),
+  TRUE,
+   if(and(P3=""digest"",AS3=""""),""ready to set up: enter volume to use"",""ready to set up"")))
+))&
+if(F3,"" (priority)"","""")&
+if(regexmatch(Registry_List_of_abandoned_dIDs,"",""&B3&"",""),char(10)&""no active uses"","""")&
+let(
+entry_list,
+if(P3="""", {$M3:$N3,$P3:$Q3},
+if(P3=""PCR"",{$M3:$N3,$P3:$X3,$Z3,$AL3,$AT3:$AY3,$BB3:$BE3},
+if(P3=""anneal"",{$M3:$N3,$P3:$R3,$AL3,$AT3:$AV3,$BD3:BE3},
+if(P3=""digest"",{$M3:$N3,$P3,$Z3:$AE3,$AH3:$AI3,$AL3,$AS3:$AW3,$AZ3,$BB3:$BE3}
+)))),
+ifs(
+index(entry_list,1)="""","""",
+NOT(regexmatch(join(""◆"",entry_list),""[^◆]◆{2,}[^◆]"")),"""",
+true,char(10)&""missing data?""
+))","=if(A3="""","""",
+iferror(and(B3<>"""",regexmatch(Registry_Priority_flagged_IDs,B3&"",""))))",,,,,"=if(A3="""","""",
+J3
++if(BF3<>"""",settings_QCQuantitationVolume,0)
++if(BL3<>"""",settings_QCGelSampleVolume,0)
++iferror(index('(Lookup lists & tabulations)'!$K$4:$K,xmatch($B3,'(Lookup lists & tabulations)'!$J$4:$J,0,2))))","=if(A3="""","""",
+if(BC3="""",settings_dDefaultElutionVolume,BC3)-K3)",,,,,,,,,,,,,,,,,,,,,,,,,,,"=ifs(
+$A3="""","""",
+$AL3,""Certified OK"",
+
+FALSE,""Handle missing or inconsistent queueing fields first"",
+and(P3=""PCR"",countblank(M3,N3,Q3:X3,Z3)>0),""Not fully queued!"",
+and(P3=""anneal"",countblank(M3,N3,Q3,R3)>0),""Not fully queued!"",
+and(P3=""digest"",countblank(M3,N3,Z3:AE3,if(AA3=""Double"",AF3:AG3,TRUE),AH3:AI3)>0),""Not fully queued!""&if(AA3=""Double"","" Enzyme and volume for second digest enzyme needed"",""""),
+and(P3=""digest"",AA3=""Single"",or(AF3<>"""",AG3<>"""")),""Only double digests should have a second enzyme and volume!"",
+and(P3=""digest"",AD3=AF3),""Duplicate enzyme - select Single digest instead"",
+
+iferror(regexmatch(index(Oligos_o_Status,xmatch(Q3,Oligos_o_ID)),""⛔""),FALSE),""oligo 1 is lost/abandoned!"",
+iferror(regexmatch(index(Oligos_o_Status,xmatch(R3,Oligos_o_ID)),""⛔""),FALSE),""oligo 2 is lost/abandoned!"",
+
+$P3=""anneal"",trim(join(char(10),
+ if(or(index('Oligos o'!$K:$K,match(Q3,'Oligos o'!$B:$B,0))=""y"",index('Oligos o'!$K:$K,match(R3,'Oligos o'!$B:$B,0))=""y""),""Marked as anneal, but using a USER oligo?"",""""),
+ if(countblank(U3,V3,W3,X3,Z3)<>5,""PCR conditions are specified for this anneal?"",""""),
+ let(anneal_len,COMMON_SUBSTRING_FROM_LEFT(1,CK3,CN3),
+  ifs(
+   anneal_len<settings_dAnnealMinLen,
+     if(COMMON_SUBSTRING_FROM_RIGHT(1,CK3,CN3)>settings_dAnnealMinLen,""Are these oligos meant to have 5' overhangs? Those are not supported yet, but you can certify queueing anyway."",
+     ""Only ""&anneal_len&"" annealing bases found between oligos!""),
+   anneal_len<settings_dAnnealWarnLen,""Only ""&anneal_len&"" annealing bases found between oligos?"",
+   left(CK3,anneal_len)<>right(CN3,anneal_len),""Mismatched anneal base(s) detected!"",
+   TRUE,""✓ ""&anneal_len&"" bases anneal""&
+  ifs(
+    FALSE,""The oligos anneal; now check whether the overhangs are reverse complementary (which allows either assembly orientation)"",
+    iferror(index(split(CO3,""_""),1)=index(split(CO3,""_""),2)
+     ,FALSE),char(10)&""Warning: junctions are reverse complementary - fragment will not assemble with a specific orientation!"",
+    TRUE,"""")   
+ )))),
+
+$AN3="""",""Fragment sequence is missing!"",
+
+FALSE,""For PCRs, check that primers are part of fragment sequence; use IF so the checks are not evaluated for digests"",
+if(P3=""PCR"",
+ not(or(
+  and(iferror(search(index(Oligos_o_Sequence,xmatch(Q3,Oligos_o_ID)),AN3),FALSE),iferror(search(DNA_REVERSE_COMPLEMENT(index(Oligos_o_Sequence,xmatch(R3,Oligos_o_ID))),AN3),FALSE)),
+  and(iferror(search(index(Oligos_o_Sequence,xmatch(R3,Oligos_o_ID)),AN3),FALSE),iferror(search(DNA_REVERSE_COMPLEMENT(index(Oligos_o_Sequence,xmatch(Q3,Oligos_o_ID))),AN3),FALSE))
+)),FALSE),
+  ""Primer not found in fragment sequence! Check primer oID"",
+
+FALSE,""For PCRs, check whether the overhangs are reverse complementary (which allows either assembly orientation)"",
+if(P3=""PCR"",
+ iferror(CO3=DNA_REVERSE_COMPLEMENT(CP3),FALSE),FALSE),
+ ""Warning: junctions are reverse complementary - fragment will not assemble with a specific orientation!"",
+
+FALSE,""Queueing validity now only depends on whether the PCR template or digest input DNA is available and valid"",
+TRUE,let(input_dna,if(P3=""PCR"",S3,AB3),
+let(status,iferror(lower(if(regexmatch(input_dna,""^\D\d+$""),
+ switch(left(input_dna),
+ ""m"",iferror(index(Minipreps_m_Status,xmatch(input_dna,Minipreps_m_ID)),""error""),
+ ""o"",iferror(index(Oligos_o_Status,xmatch(input_dna,Oligos_o_ID)),""error""),
+ ""d"",iferror(index(dsDNA_d_Status,xmatch(input_dna,dsDNA_d_ID)),""error""),
+ ""r"",iferror(index(Registry_Status,xmatch(input_dna,Registry_ID)),""error""),
+ ""s"",iferror(index(Strains_s_Status,xmatch(input_dna,Strains_s_ID)),""error"")),
+ index(Registry_Status,xmatch(input_dna,Registry_Construct_name)))),""error""),
+ ifs(
+  status=""error"",""Template ID not recognized!"", 
+  regexmatch(status,""[Aa]bandon""),""Template abandoned!"",
+  regexmatch(status,""hold""),""template held?"",
+  and(P3=""digest"",left(input_dna)=""o"",iferror(index(Oligos_o_dsDNA_or_ultramer?,xmatch(input_dna,Oligos_o_ID)))=FALSE),""ssDNA template not appropriate for digest!"",
+  not(regexmatch(status,""(done)|([Cc]omplete)"")),if(regexmatch(status,""(⛔)""),""Template failed!"",""Template not available yet?""),
+  TRUE,""✓ No queueing errors found""))))&
+if(and(P3=""digest"",AE3+AG3>0.1*Z3),char(10)&""Enzyme volume is >10% of reaction - risk of star activity?"","""")&
+if(AQ3<>"""",char(10)&""duplicate(s) exist"","""")
+
+
+","=switch(P3,
+"""",,
+""PCR"",T3,
+""digest"",AI3,
+""anneal"",let(anneal_len,COMMON_SUBSTRING_FROM_LEFT(1,$CK3,$CN3),
+ if(anneal_len=0,"""",
+ trim(left($CK3,anneal_len)))),
+"""")","=ifs(A3="""","""",
+P3=""anneal"",average(index(Oligos_o_Length,xmatch(Q3,Oligos_o_ID)),index(Oligos_o_Length,xmatch(Q3,Oligos_o_ID)))/1000,
+TRUE,len(AN3)/1000)",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,0,,,,,,,"=ifs(A3="""","""",
+CD3="""","""",
+TRUE,if(regexmatch(Lookup_lists_and_tabulations_Verified_mID_Sources,join(""|"",bycol(split(CD3,"" ""),lambda(x,"",a""&x&"","")))),""yes"",""""))","=IFERROR(
+if(A3<>"""",
+trim(join("" "",
+sort(filter(Assemblies_a_Num,search(B3&"" "",'Assemblies a'!$DH:$DH)),1,FALSE)))
+,""""))","=join("" "",sort({Q3,R3}),if(AN3="""",B3&"" has no fragment sequence, don't match it as a duplicate"",AN3),AD3,AF3)","=if(A3="""","""",
+trim(join(char(10),
+byrow(
+sort(
+iferror(filter($A$3:$A,$CE$3:$CE=CE3,$P$3:$P=P3,$A$3:$A<>A3),""""),
+1,FALSE
+),
+lambda(r,if(r<>"""",join("" "",r,substitute(index(E$3:E,r),char(10),"" "")),""""))
+))))","=ifs(
+P3="""","""",
+AC3="""","""",
+P3=""PCR"","""",
+P3=""anneal"","""",
+P3=""digest"",iferror(ifs(
+left(AB3)= ""o"",AC3/settings_gOligoDonorDefaultConcentration,
+left(AB3)= ""d"",AC3/index(dsDNA_d_Conc,xmatch(AB3,dsDNA_d_ID)),
+left(AB3)= ""m"",AC3/index(Minipreps_m_Conc,xmatch(AB3,Minipreps_m_ID)),
+TRUE, AC3/index(Minipreps_m_Conc,xmatch( iferror(index(filter(Minipreps_m_Well,Minipreps_m_Construct_name=AB3,Minipreps_m_Volume_left>settings_dTemplateMiniprepMinVolumeLeft, regexmatch(Minipreps_m_Status, ""done""), regexmatch(Minipreps_m_Status, ""♥"")), 1), ""Not available?""),Minipreps_m_Well))),""n/a?""))","=or(BI3<>"""",BO3<>"""",BX3<>"""")","=ifs(A3="""","""",
+P3=""anneal"",settings_dPCRAnnealedOligoNku*AO3,
+BK3<>"""",BK3,
+TRUE,settings_dPCRAssumedConc)","=ifs(A3="""","""",
+P3=""anneal"",settings_dPCRAnnealedOligoNku,
+TRUE,iferror(CI3/AO3))","=if(Q3="""","""",
+index('Oligos o'!$P:$P,match(Q3,'Oligos o'!$B:$B,0)))","=if(R3="""","""",
+index('Oligos o'!$P:$P,match(R3,'Oligos o'!$B:$B,0)))","=if(CK3="""","""",
+DNA_REVERSE_COMPLEMENT(CK3))","=if(CL3="""","""",
+DNA_REVERSE_COMPLEMENT(CL3))","=ifs(
+or($Q3="""",$R3=""""),,
+$P3=""anneal"",
+ let(anneal_len,COMMON_SUBSTRING_FROM_LEFT(1,$CK3,$CN3),
+ if(anneal_len=0,""Jct search error!"",
+ trim(lower(left($CN3,len($CN3)-anneal_len)))&""_""&trim(DNA_REVERSE_COMPLEMENT(lower(right($CK3,len($CK3)-anneal_len)))))),
+iferror(and(index(Oligos_o_USER?,ID_TO_INDEX($Q3))=""y"",index(Oligos_o_USER?,ID_TO_INDEX($R3))=""y""),FALSE),
+ ifs(
+  $AN3="""",index(Oligos_o_USER_jct_sequence,ID_TO_INDEX($Q3))&""_""&index(Oligos_o_USER_jct_sequence,ID_TO_INDEX($R3)),
+  and(iferror(search($CK3,$AN3),FALSE),iferror(search($CN3,$AN3),FALSE)),
+   index(Oligos_o_USER_jct_sequence,ID_TO_INDEX($Q3)),
+  and(iferror(search($CL3,$AN3),FALSE),iferror(search($CM3,$AN3),FALSE)),
+   index(Oligos_o_USER_jct_sequence,ID_TO_INDEX($R3)),
+  TRUE,""USER jct search error!""),
+TRUE,""jct search error!"")","=ifs(
+or($Q3="""",$R3=""""),,
+$P3=""anneal"",
+ let(anneal_len,COMMON_SUBSTRING_FROM_LEFT(1,$CK3,$CN3),
+ if(anneal_len=0,""Jct search error!"",
+ trim(lower(right($CK3,len($CK3)-anneal_len)))&""_""&trim(DNA_REVERSE_COMPLEMENT(lower(left($CN3,len($CN3)-anneal_len)))))),
+iferror(and(index(Oligos_o_USER?,ID_TO_INDEX($Q3))=""y"",index(Oligos_o_USER?,ID_TO_INDEX($R3))=""y""),FALSE),
+ ifs(
+  $AN3="""",DNA_REVERSE_COMPLEMENT(index(Oligos_o_USER_jct_sequence,ID_TO_INDEX($R3)))&""_""&DNA_REVERSE_COMPLEMENT(index(Oligos_o_USER_jct_sequence,ID_TO_INDEX($Q3))),
+  and(iferror(search($CK3,$AN3),FALSE),iferror(search($CN3,$AN3),FALSE)),
+   DNA_REVERSE_COMPLEMENT(index(Oligos_o_USER_jct_sequence,ID_TO_INDEX($R3))),
+  and(iferror(search($CL3,$AN3),FALSE),iferror(search($CM3,$AN3),FALSE)),
+   DNA_REVERSE_COMPLEMENT(index(Oligos_o_USER_jct_sequence,ID_TO_INDEX($Q3))),
+  TRUE,""USER jct search error!""),
+TRUE,""jct search error!"")","=if(A3="""","""",if(AN3<>"""",left(AN3,settings_aGibsonSearchDistance),left(CK3,settings_aGibsonSearchDistance)))","=if(A3="""","""",if(AN3<>"""",right(AN3,settings_aGibsonSearchDistance),right(CN3,settings_aGibsonSearchDistance)))","=if($BT3="""","""",transpose(filter(settings_dAgaroseGelLadderBandSizes,settings_dAgaroseGelLadderChoices=$BT3)))",,,,,,,,,,,,,,,,,,,

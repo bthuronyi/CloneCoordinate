@@ -1,0 +1,220 @@
+Named Function name,Description,Argument placeholders,Definition
+COMMON_SUBSTRING_BY_WINDOW_FROM_LEFT,Finds whether TARGET contains any substrings of length LENGTH starting from the beginning of SOURCE. Initial call should be with POS = 1.,"target,source,length,pos","=let(check,mid(source,pos,length),
+ifs(
+ len(check)<length,FALSE,
+ regexmatch(lower(target),lower(check)),TRUE,
+ TRUE,COMMON_SUBSTRING_BY_WINDOW_FROM_LEFT(target,source,length,pos+1)))"
+COMMON_SUBSTRING_FROM_LEFT,"Finds the longest substring from the beginning of source that is found anywhere within target (case insensitive). The initial guess_length can be 1. If no match in target is found for guess_length characters of source, the function returns 0.","guess_length,source,target","=ifs(
+or(guess_length > len(source), guess_length > len(target)), 0,
+iferror(search(left(source,guess_length+1),target),FALSE),COMMON_SUBSTRING_FROM_LEFT(guess_length+1,source,target),
+TRUE,guess_length)"
+COMMON_SUBSTRING_FROM_RIGHT,"Finds the longest substring from the beginning of source that is found anywhere within target (case insensitive). The initial guess_length can be 1. If no match in target is found for guess_length characters of source, the function returns 0.","guess_length,source,target","=ifs( not(iferror(search(right(source,guess_length),target))),0, iferror(search(right(source,guess_length+1),target)),COMMON_SUBSTRING_FROM_RIGHT(guess_length+1,source,target), TRUE,guess_length)"
+CONTAINS,"Checks whether value appears in a range, returns TRUE if the value appears otherwise FALSE.","cell,range","=NOT(ISERROR(MATCH(cell,range,0)))"
+DATE_YYMMDD,"Converts a date string, between the year 2000 and 2099, in YYMMDD format to a Sheets date.",str,"=date(""20""&left(str,2),mid(str,3,2),right(str,2))"
+DNA_REVERSE_COMPLEMENT,"Returns the reverse complement of a string of DNA letters (ACGT only, case insensitive) as a lowercase string. U is also allowed and is reverse complemented to A.",cell,"=substitute(substitute(substitute(substitute(substitute(substitute(substitute(substitute(substitute(
+arrayformula(lower(concatenate(mid(cell,len(cell)-row(indirect(""1:""&len(cell)))+1,1)))),
+""a"",""x""),""t"",""y""), ""u"",""w""),""g"",""z""),""c"",""g""),""z"",""c""),""y"",""a""),""w"",""a""),""x"",""t"")"
+DOES_ID_EXIST,"Checks whether an ID is one of the allowed types and is listed in its tab. Returns TRUE if so, FALSE if not, and """" if the ID isn't recognized as one of the allowed types or if an argument is blank. Hard-codes Named Ranges for each ID type to check against.","allowed_id_types,id","=ifs(
+allowed_id_types="""",FALSE,
+id="""",FALSE,
+not(regexmatch(allowed_id_types,""^[teordagms]+$"")),"""",
+not(regexmatch(id,""^[""&allowed_id_types&""]\d+$"")),"""",
+iferror(switch(left(id),
+""t"",isna(xmatch(id,Transformations_ID)),
+ ""e"", isna(xmatch(id,Experiments_ID)),
+ ""o"", isna(xmatch(id,Oligos_o_ID)),
+ ""r"", isna(xmatch(id,Registry_ID)),
+ ""d"", isna(xmatch(id,dsDNA_d_ID)),
+ ""a"", isna(xmatch(id, Assemblies_a_ID)),
+ ""g"", isna(xmatch(id, Golden_Gate_g_ID)),
+ ""m"", isna(xmatch(id, Minipreps_m_ID)),
+ ""s"", isna(xmatch(id, Strains_s_ID)))
+ ,TRUE),FALSE,
+TRUE,TRUE)"
+FORMAT_FOR_PIPETTING,Format a volume in µL as text with an appropriate number of decimal places based on pipette precision.,vol,"=if(vol="""","""",to_text(ifs(vol<2,text(vol,""0.000""),vol<20,text(vol,""0.00""),vol<200,text(vol,""0.0""),TRUE,text(vol,""0""))))"
+GET_CONSTRUCT_NAME_BY_ID,Returns the Construct Name column value for an ID from the appropriate tab. Returns FALSE if the ID isn't valid or there is a lookup error. Hard-codes Named Ranges for each ID type to check against.,id,"=ifs(
+id="""",""???"",
+not(DOES_ID_EXIST(""tragms"",id)),""???"",
+TRUE,iferror(switch(left(id),
+""t"", index(Transformations_Construct_name,ID_TO_INDEX(id)),
+ ""r"", index(Registry_Construct_name,ID_TO_INDEX(id)),
+ ""a"", index(Assemblies_a_Construct_name,ID_TO_INDEX(id)),
+ ""g"", index(Golden_Gate_g_Construct_name,ID_TO_INDEX(id)),
+ ""m"", index(Minipreps_m_Construct_name,ID_TO_INDEX(id)),
+ ""s"", index(Strains_s_Plasmid_name,ID_TO_INDEX(id)),
+ ""???""),""???""))"
+GET_STATUS_BY_ID,Returns the Status column value for an ID from the appropriate tab. Returns FALSE if the ID isn't valid or there is a lookup error. Hard-codes Named Ranges for each ID type to check against.,id,"=ifs(
+id="""",FALSE,
+not(DOES_ID_EXIST(""teordagms"",id)),FALSE,
+TRUE,iferror(switch(left(id),
+""t"", index(Transformations_Status,ID_TO_INDEX(id)),
+ ""e"", index(Experiments_Status,ID_TO_INDEX(id)),
+ ""o"", index(Oligos_o_Status,ID_TO_INDEX(id)),
+ ""r"", index(Registry_Status,ID_TO_INDEX(id)),
+ ""d"", index(dsDNA_d_Status,ID_TO_INDEX(id)),
+ ""a"", index(Assemblies_a_Status,ID_TO_INDEX(id)),
+ ""g"", index(Golden_Gate_g_Status,ID_TO_INDEX(id)),
+ ""m"", index(Minipreps_m_Status,ID_TO_INDEX(id)),
+ ""s"", index(Strains_s_Status,ID_TO_INDEX(id)),
+ FALSE),FALSE))"
+ID_TO_INDEX,"Takes an ID of the form ""a1234"" and returns 1234 + the number of header rows stored in settings_NumHeaderRows (Named Range cell). Use with INDEX to quickly look up an ID. Only accepts valid ID characters (terodagms).",id,"=ifs(regexmatch(text(id,""0""),""^[terodagms]\d+$""),right(id,len(id)-1)+settings_NumHeaderRows,regexmatch(text(id,""0""),""^\d+$""),id+settings_NumHeaderRows,TRUE,""ID_TO_INDEX error with ""&id&""!"")"
+ID_TO_NUM,"Takes an ID of the form ""a1234"" and returns 1234.",id,"=right(id,len(id)-1)"
+ID_TO_WELL,"Converts an identifier (one character followed by a positive integer serial number up to , e.g. d98) to the corresponding plate number and well position in a series of 96-well plates, numbered by columns (e.g. d98 returns d02.B01). Using an identifier with a serial number >9504 will result in a 3-digit plate ID. Invalid identifiers will be returned without change.","size,id","=ARRAYFORMULA(
+  IF(
+    REGEXMATCH(id, ""^\D\d+$""),
+    IF(
+      REGEXMATCH(size, ""\d+[w]""),
+      IF(
+        size = ""96w"",
+        LEFT(id, 1) &
+        TEXT(CEILING(RIGHT(id, LEN(id) - 1) / 96), ""00"") & ""."" &
+        CHAR(
+          IF(MOD(RIGHT(id, LEN(id) - 1), 8) = 0, 8, MOD(RIGHT(id, LEN(id) - 1), 8)) + 64
+        ) &
+        TEXT(
+          CEILING(
+            IF(MOD(RIGHT(id, LEN(id) - 1), 96) = 0, 96, MOD(RIGHT(id, LEN(id) - 1), 96)) / 8
+          ),
+          ""00""
+        ),
+        IF(
+          size = ""24w"",
+          LEFT(id, 1) &
+          TEXT(CEILING(RIGHT(id, LEN(id) - 1) / 24), ""00"") & ""."" &
+          CHAR(
+            IF(MOD(RIGHT(id, LEN(id) - 1), 4) = 0, 4, MOD(RIGHT(id, LEN(id) - 1), 4)) + 64
+          ) &
+          TEXT(
+            CEILING(
+              IF(MOD(RIGHT(id, LEN(id) - 1), 24) = 0, 24, MOD(RIGHT(id, LEN(id) - 1), 24)) / 4
+            ),
+            ""00""
+          ),
+          id
+        )
+      ),
+      IF(
+        REGEXMATCH(size, ""\d+[r]\d+[c]""),
+        LET(
+          plate_rows, REGEXEXTRACT(size, ""^(\d+)""),
+          plate_columns, REGEXEXTRACT(size, ""(?:[r])(\d+)""),
+          IF(
+            REGEXMATCH(id, ""^\D\d+$""),
+            LEFT(id, 1) &
+            TEXT(
+              CEILING(
+                RIGHT(id, LEN(id) - 1) / (plate_rows * plate_columns)
+              ),
+              ""00""
+            ) & ""."" &
+            CHAR(
+              IF(
+                MOD(RIGHT(id, LEN(id) - 1), plate_rows) = 0,
+                plate_rows,
+                MOD(RIGHT(id, LEN(id) - 1), plate_rows)
+              ) + 64
+            ) &
+            TEXT(
+              CEILING(
+                IF(
+                  MOD(RIGHT(id, LEN(id) - 1), plate_rows * plate_columns) = 0,
+                  plate_rows * plate_columns,
+                  MOD(RIGHT(id, LEN(id) - 1), plate_rows * plate_columns)
+                ) / plate_rows
+              ),
+              ""00""
+            ),
+            ""#VALUE!""
+          )
+        ),
+        IF(
+          REGEXMATCH(size, ""[b]\d+""),
+          LET(
+            box_number, REGEXEXTRACT(size, ""(?:[b])(\d+)""),
+            id_number, RIGHT(id, LEN(id) - 1),
+            ""box "" & FLOOR((id_number - 1) / box_number) + 1 & "", "" & id
+          ),
+          id
+        )
+      )
+    ),
+    id
+  )
+)"
+MATCH_FRAGMENT_JUNCTIONS_3PRIME,"Determines whether the fragments with the given junctions assemble together based on exact matching between the junctions at the fragment ends. If so, the 3' junction of the final assembled fragment is returned. If not, FALSE is returned.","jcts_l_pipe_separated_string,jcts_r_pipe_separated_string,input_jct_r","=if(
+not(iferror(regexmatch(jcts_l_pipe_separated_string,""|""),FALSE)),input_jct_r,
+let(
+jcts_l,split(jcts_l_pipe_separated_string,""|""),
+jcts_r,split(jcts_r_pipe_separated_string,""|""),
+if(counta(jcts_l)<>counta(jcts_r),#VALUE!,
+if(regexmatch(jcts_l,""\_""),
+if(or(
+   regexmatch(jcts_l_pipe_separated_string,""^""&input_jct_r&""[\_|]""),
+   regexmatch(jcts_l_pipe_separated_string,""[\_|]""&input_jct_r&""[\_|]""),
+   regexmatch(jcts_l_pipe_separated_string,""[\_|]""&input_jct_r&""$"")),
+ let(match_array,map(jcts_l,lambda(x,not(or(regexmatch(x,""^""&input_jct_r&""\_""),regexmatch(x,""\_""&input_jct_r&""$""),x=input_jct_r)))),
+ iferror(
+  MATCH_FRAGMENT_JUNCTIONS_3PRIME(
+  join(""|"",filter(jcts_l,match_array)),
+  join(""|"",filter(jcts_r,match_array)),
+ let(rm,index(jcts_r,xmatch(FALSE,match_array)),
+  if(regexmatch(rm,""\_""),
+   if(regexmatch(index(jcts_l,xmatch(FALSE,match_array)),""\_""&input_jct_r&""$""),index(split(rm,""_""),2),index(split(rm,""_""),1)),
+   rm))),
+ FALSE)),
+let(match_array,map(jcts_r,lambda(x,not(or(regexmatch(x,""^""&input_jct_r&""\_""),regexmatch(x,""\_""&input_jct_r&""$""),x=input_jct_r)))),
+ iferror(
+  MATCH_FRAGMENT_JUNCTIONS_3PRIME(
+  join(""|"",filter(jcts_l,match_array)),
+  join(""|"",filter(jcts_r,match_array)),
+ let(rm,index(jcts_l,xmatch(FALSE,match_array)),
+  if(regexmatch(rm,""\_""),
+   if(regexmatch(index(jcts_l,xmatch(FALSE,match_array)),""\_""&input_jct_r&""$""),index(split(rm,""_""),2),index(split(rm,""_""),1)),
+   rm))),
+ FALSE)))
+,
+if(isnumber(xmatch(input_jct_r,jcts_l)),
+ let(match_array,map(jcts_l,lambda(x,x<>input_jct_r)),
+ iferror(
+  MATCH_FRAGMENT_JUNCTIONS_3PRIME(
+  join(""|"",filter(jcts_l,match_array)),
+  join(""|"",filter(jcts_r,match_array)),
+  index(jcts_r,xmatch(FALSE,match_array))),
+ FALSE)),
+ let(match_array,map(jcts_r,lambda(x,x<>input_jct_r)),
+ iferror(
+  MATCH_FRAGMENT_JUNCTIONS_3PRIME(
+  join(""|"",filter(jcts_l,match_array)),
+  join(""|"",filter(jcts_r,match_array)),
+  index(jcts_l,xmatch(FALSE,match_array))),
+ FALSE))
+)))))"
+MATCH_GIBSON_3PRIME,"Determines whether the fragments with the given sequences at their ends assemble together based on having a common sequence of length LENGTH. If so, the 3' end sequence of the final assembled fragment is returned. If not, FALSE is returned.","jcts_l_pipe_separated_string,jcts_r_pipe_separated_string,input_jct_r,length","=let(
+jcts_l,split(jcts_l_pipe_separated_string,""|""),
+jcts_r,split(jcts_r_pipe_separated_string,""|""),
+ifs(
+counta(jcts_l)=1,if(COMMON_SUBSTRING_BY_WINDOW_FROM_LEFT(jcts_l,input_jct_r,length,1),jcts_r,
+ if(COMMON_SUBSTRING_BY_WINDOW_FROM_LEFT(DNA_REVERSE_COMPLEMENT(jcts_r),input_jct_r,length,1),DNA_REVERSE_COMPLEMENT(jcts_l),FALSE)),
+counta(jcts_l)<>counta(jcts_r),FALSE,
+TRUE,let(
+match_array_fwd,map(jcts_l,lambda(x,COMMON_SUBSTRING_BY_WINDOW_FROM_LEFT(x,input_jct_r,length,1))),
+match_array_rc,map(jcts_r,lambda(x,COMMON_SUBSTRING_BY_WINDOW_FROM_LEFT(DNA_REVERSE_COMPLEMENT(x),input_jct_r,length,1))),
+ifs(
+ countif({match_array_fwd,match_array_rc},""=TRUE"")>1,FALSE,
+ countif(match_array_fwd,""=TRUE"")=1,
+ iferror(
+  MATCH_GIBSON_3PRIME(
+  join(""|"",filter(jcts_l,arrayformula(not(match_array_fwd)))),
+  join(""|"",filter(jcts_r,arrayformula(not(match_array_fwd)))),
+  index(jcts_r,xmatch(TRUE,match_array_fwd)),
+  length),FALSE),
+ TRUE,
+ iferror(
+  MATCH_GIBSON_3PRIME(
+  join(""|"",filter(jcts_l,arrayformula(not(match_array_rc)))),
+  join(""|"",filter(jcts_r,arrayformula(not(match_array_rc)))),
+  DNA_REVERSE_COMPLEMENT(index(jcts_l,(xmatch(TRUE,match_array_rc)))),
+  length),FALSE)))))"
+TUBE_NUMBER_TO_8_WELL_STRIP_POSITION,Converts a tube serial number to the corresponding 8-well strip (column) and well (row).,tube_no,"=if(isnumber(tube_no),""s""&TEXT(FLOOR(1+(tube_no-1)/8,1),""0"")&""-""&TEXT(1+MOD(tube_no-1,8),""0""),"""")"
+WELL_TO_ID,"Converts a plate type, plate number and well position from a series of 96-well plates into its corresponding ID number (see IDTOWELL). The well position must be 3 characters (e.g. A01).",well,"=iferror(if(regexmatch(well,""^\D\d+\.[A-H][01][0-9]$""),
+CONCATENATE(LEFT(well,1),96*(LEFT(RIGHT(well,LEN(well)-1),len(well)-5)-1)+(RIGHT(RIGHT(well,LEN(well)-1),2)-1)*8+CODE(UPPER(LEFT(RIGHT(RIGHT(well,LEN(well)-1),3),1)))-64),#VALUE!),#VALUE!)"

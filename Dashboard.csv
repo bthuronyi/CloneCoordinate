@@ -1,0 +1,109 @@
+"=""CloneCoordinate ""&settings_DashboardLabName",,,,,,,,,,,,version 1.0,used by formulas >
+Links:,Guide/Manual,CC Slack,CCA Sheets (add-ons),,,,,,,,,,
+Recommended (efficient) tasks are highlighted in green and high-priority tasks in lavender + blue. More intense color means the task has not been done in a long time.,,,,,,,,,,,,,
+# of priority tasks ready,"# of
+tasks ready",type of sample,procedure,status text shown when ready,# queued,"=""days since last done""&iferror("" (""&min(G5:G28)&""-""&max(G5:G28)&"")"")",good # to do,time estimate,protocol quality,task #,type,skill set,
+"=counta(iferror(filter(Oligos_o_Status,Oligos_o_Priority,regexmatch(Oligos_o_Status,$E5))))","=counta(iferror(filter(Oligos_o_Status,regexmatch(Oligos_o_Status,$E5))))",oligos o,"=hyperlink(index(settings_DashboardProtocolLinksList,row(A5)-row($A$5)+1),""make stocks"")",ready to stock,"=counta(iferror(filter(Oligos_o_Status,regexmatch(Oligos_o_Status,""(wait)|(ready to order)""))))","=iferror(let(latest,max(Oligos_o_Stocks_made),
+datedif(DATE_YYMMDD(latest),today(),""D"")))",={settings_DashboardGoodNumberToDoList},={settings_DashboardTimeEstimateList},={settings_DashboardProtocolQualityList},=sequence(row(K29)-row(K5)+1),bench,"pipetting, tube strips","=xmatch(M5,unique($M$5:$M$29))"
+"=counta(iferror(filter(dsDNA_d_Status,dsDNA_d_Priority,regexmatch(dsDNA_d_Status,$E6),dsDNA_d_Type=""PCR"")))
+&"" / ""&
+counta(iferror(filter(dsDNA_d_Status,dsDNA_d_Priority,regexmatch(dsDNA_d_Status,$E6),dsDNA_d_Type=""anneal"")))
+&"" / ""&
+counta(iferror(filter(dsDNA_d_Status,dsDNA_d_Priority,regexmatch(dsDNA_d_Status,$E6),dsDNA_d_Type=""digest"")))","=counta(iferror(filter(dsDNA_d_Status,regexmatch(dsDNA_d_Status,$E6),dsDNA_d_Type=""PCR"")))
+&"" / ""&
+counta(iferror(filter(dsDNA_d_Status,regexmatch(dsDNA_d_Status,$E6),dsDNA_d_Type=""anneal"")))
+&"" / ""&
+counta(iferror(filter(dsDNA_d_Status,regexmatch(dsDNA_d_Status,$E6),dsDNA_d_Type=""digest"")))","dsDNA d
+PCR / anneal / digest","=hyperlink(index(settings_DashboardProtocolLinksList,row(A6)-row($A$5)+1),""set up PCR / annealing / digest"")",ready to set up,"=counta(iferror(filter(dsDNA_d_Status,regexmatch(dsDNA_d_Status,""wait""))))","=iferror(datedif(DATE_YYMMDD(max(dsDNA_d_Date_put_in_thermocycler)),today(),""D""))","8, 16, or 24",1.5 h / 16,,2,bench,"pipetting, tube strips","=xmatch(M6,unique($M$5:$M$29))"
+"=counta(iferror(filter(dsDNA_d_Status,dsDNA_d_Priority,regexmatch(dsDNA_d_Status,$E7),dsDNA_d_Type=""PCR"")))
+&"" / ""&
+counta(iferror(filter(dsDNA_d_Status,dsDNA_d_Priority,regexmatch(dsDNA_d_Status,$E7),dsDNA_d_Type=""digest"")))","=counta(iferror(filter(dsDNA_d_Status,regexmatch(dsDNA_d_Status,$E7),dsDNA_d_Type=""PCR"")))
+&"" / ""&
+counta(iferror(filter(dsDNA_d_Status,regexmatch(dsDNA_d_Status,$E7),dsDNA_d_Type=""digest"")))","dsDNA d
+PCR / digest","=hyperlink(index(settings_DashboardProtocolLinksList,row(A7)-row($A$5)+1),""purify completed PCRs / digests"")",ready to clean up,,"=iferror(datedif(DATE_YYMMDD(max(filter(dsDNA_d_Date_finished,dsDNA_d_Type=""PCR""))),today(),""D""))",up to 24,45 min / 16,,3,bench,DNA purification,"=xmatch(M7,unique($M$5:$M$29))"
+"=counta(iferror(filter(dsDNA_d_Status,dsDNA_d_Priority,regexmatch(dsDNA_d_Status,$E8))))
+","=counta(iferror(filter(dsDNA_d_Status,regexmatch(dsDNA_d_Status,$E8))))",dsDNA d,"=hyperlink(index(settings_DashboardProtocolLinksList,row(A8)-row($A$5)+1),""dilute & store annealed oligos"")",ready to dilute & store,,"=iferror(datedif(DATE_YYMMDD(max(filter(dsDNA_d_Date_finished,dsDNA_d_Type=""anneal""))),today(),""D""))",anything ready,20 min / 16,,4,bench,"pipetting, tube strips","=xmatch(M8,unique($M$5:$M$29))"
+"=counta(iferror(filter(Assemblies_a_Status,Assemblies_a_Priority,regexmatch(Assemblies_a_Status,$E9))))","=counta(iferror(filter(Assemblies_a_Status,regexmatch(Assemblies_a_Status,$E9))))",assemblies a,"=hyperlink(index(settings_DashboardProtocolLinksList,row(A9)-row($A$5)+1),""assemble from d fragments"")",ready to assemble,"=counta(iferror(filter(Assemblies_a_Status,regexmatch(Assemblies_a_Status,""wait""))))","=iferror(datedif(DATE_YYMMDD(max(Assemblies_a_Date_assembled)),today(),""D""))","8, 16, or 24",1.5 h / 16,,5,bench,"pipetting, tube strips","=xmatch(M9,unique($M$5:$M$29))"
+"=counta(iferror(filter(Golden_Gate_g_Status,Golden_Gate_g_Priority,regexmatch(Golden_Gate_g_Status,$E10))))","=counta(iferror(filter(Golden_Gate_g_Status,regexmatch(Golden_Gate_g_Status,$E10))))",Golden Gate g,"=hyperlink(index(settings_DashboardProtocolLinksList,row(A10)-row($A$5)+1),""assemble from m donors"")",ready to assemble,"=counta(iferror(filter(Golden_Gate_g_Status,regexmatch(Golden_Gate_g_Status,""wait""))))","=iferror(datedif(DATE_YYMMDD(max(Golden_Gate_g_Date_assembled)),today(),""D""))",8,2 h / 16,,6,bench,"pipetting, tube strips","=xmatch(M10,unique($M$5:$M$29))"
+"=counta(iferror(filter(Assemblies_a_Status,Assemblies_a_Priority,regexmatch(Assemblies_a_Status,$E11))))
+&"" / ""&
+counta(iferror(filter(Golden_Gate_g_Status,Golden_Gate_g_Priority,regexmatch(Golden_Gate_g_Status,$E11))))","=counta(iferror(filter(Assemblies_a_Status,regexmatch(Assemblies_a_Status,$E11))))
+&"" / ""&
+counta(iferror(filter(Golden_Gate_g_Status,regexmatch(Golden_Gate_g_Status,$E11))))",assemblies a / GGate g,"=hyperlink(index(settings_DashboardProtocolLinksList,row(A11)-row($A$5)+1),""transform completed assemblies"")",ready to transform,,"=iferror(datedif(DATE_YYMMDD(max(Transformations_Date_transformed)),today(),""D""))","8, 16, or 24",3 h / 16,,7,bench,comp cell & Petri dish use,"=xmatch(M11,unique($M$5:$M$29))"
+"=counta(iferror(filter(Transformations_Status,regexmatch(Transformations_Status,E12),Transformations_Priority)))","=counta(iferror(filter(Transformations_Status,regexmatch(Transformations_Status,E12))))",transformations,"=hyperlink(index(settings_DashboardProtocolLinksList,row(A12)-row($A$5)+1),""score transformation plates"")",ready to score plates,,"=iferror(datedif(DATE_YYMMDD(max(Transformations_Date_scored)),today(),""D""))",anything ready,2 min each,,8,bench,colony inspection,"=xmatch(M12,unique($M$5:$M$29))"
+"=counta(iferror(filter(Assemblies_a_Status,Assemblies_a_Priority,regexmatch(Assemblies_a_Status,$E13))))
+&"" / ""&
+counta(iferror(filter(Golden_Gate_g_Status,Golden_Gate_g_Priority,regexmatch(Golden_Gate_g_Status,$E13))))","=counta(iferror(filter(Assemblies_a_Status,regexmatch(Assemblies_a_Status,$E13))))
+&"" / ""&
+counta(iferror(filter(Golden_Gate_g_Status,regexmatch(Golden_Gate_g_Status,$E13))))",assemblies a / GGate g,"=hyperlink(index(settings_DashboardProtocolLinksList,row(A13)-row($A$5)+1),""queue preps of successful transformations/assemblies"")",ready to queue miniprep,,"=iferror(datedif(DATE_YYMMDD(max(Minipreps_m_Queued_date)),today(),""D""))",anything ready,10 min,,9,bench,queueing in CC,"=xmatch(M13,unique($M$5:$M$29))"
+"=
+counta(iferror(filter(Minipreps_m_Status,Minipreps_m_Priority,regexmatch(Minipreps_m_Status,$E14),left(Minipreps_m_Source_ID)<>""s"")))
+&"" / ""&
+counta(iferror(filter(Minipreps_m_Status,Minipreps_m_Priority,regexmatch(Minipreps_m_Status,$E14),left(Minipreps_m_Source_ID)=""s"")))","=
+counta(iferror(filter(Minipreps_m_Status,regexmatch(Minipreps_m_Status,$E14),left(Minipreps_m_Source_ID)<>""s"")))
+&"" / ""&
+counta(iferror(filter(Minipreps_m_Status,regexmatch(Minipreps_m_Status,$E14),left(Minipreps_m_Source_ID)=""s"")))","minipreps m
+plates / strains","=hyperlink(index(settings_DashboardProtocolLinksList,row(A14)-row($A$5)+1),""inoculate liquid culture"")",ready to inoculate for miniprep,"=counta(iferror(filter(Minipreps_m_Status,regexmatch(Minipreps_m_Status,""wait""))))","=iferror(datedif(DATE_YYMMDD(max(Minipreps_m_Date_inoculated)),today(),""D""))",24 or 48,1h / 24,,10,bench,inoculation,"=xmatch(M14,unique($M$5:$M$29))"
+"=counta(iferror(filter(Minipreps_m_Status,Minipreps_m_Priority,regexmatch(Minipreps_m_Status,$E15))))","=counta(iferror(filter(Minipreps_m_Status,regexmatch(Minipreps_m_Status,$E15))))",minipreps m,"=hyperlink(index(settings_DashboardProtocolLinksList,row(A15)-row($A$5)+1),""prep plasmids after overnight growth ("" & settings_mCultureAge & "" day growth max)"")",ready to miniprep,,"=iferror(datedif(DATE_YYMMDD(max(Minipreps_m_Date_purified)),today(),""D""))",1-2 plates of 24,"2 h / 1 plate;
+3 h / 2 plates",,11,bench,DNA purification,"=xmatch(M15,unique($M$5:$M$29))"
+"=counta(iferror(filter(dsDNA_d_Status,dsDNA_d_Priority,regexmatch(dsDNA_d_Status,$E16))))
+&"" / ""&
+counta(iferror(filter(Minipreps_m_Status,Minipreps_m_Priority,regexmatch(Minipreps_m_Status,$E16))))","=counta(iferror(filter(dsDNA_d_Status,regexmatch(dsDNA_d_Status,$E16))))
+&"" / ""&
+counta(iferror(filter(Minipreps_m_Status,regexmatch(Minipreps_m_Status,$E16))))",dsDNA d / minipreps m,"=hyperlink(index(settings_DashboardProtocolLinksList,row(A16)-row($A$5)+1),""quantitate"")",ready to quant,,"=iferror(datedif(DATE_YYMMDD(max(max(dsDNA_d_Date_quant),max(Minipreps_m_date_quant))),today(),""D""))","16, 32, 64...",30 min for 32,,12,bench,DNA quantitation,"=xmatch(M16,unique($M$5:$M$29))"
+"=counta(iferror(filter(dsDNA_d_Status,dsDNA_d_Priority,regexmatch(dsDNA_d_Status,$E17))))
+&"" / ""&
+counta(iferror(filter(Minipreps_m_Status,Minipreps_m_Priority,regexmatch(Minipreps_m_Status,$E17))))","=counta(iferror(filter(dsDNA_d_Status,regexmatch(dsDNA_d_Status,$E17))))
+&"" / ""&
+counta(iferror(filter(Minipreps_m_Status,regexmatch(Minipreps_m_Status,$E17))))",dsDNA d / minipreps m,"=hyperlink(index(settings_DashboardProtocolLinksList,row(A17)-row($A$5)+1),""gel sample prep"")",ready to prep gel sample,,"=iferror(datedif(DATE_YYMMDD(max(max(dsDNA_d_Gel_sample_prep_date),max(Minipreps_m_Gel_sample_prep_date))),today(),""D""))","8, 16, 32...",2 min each,,13,bench,"pipetting, tube strips","=xmatch(M17,unique($M$5:$M$29))"
+"=join("" / "",
+counta(iferror(filter(Transformations_Status,regexmatch(Transformations_Status,$E18),Transformations_Priority))),
+counta(iferror(filter(Minipreps_m_Status,regexmatch(Minipreps_m_Status,$E18),Minipreps_m_Priority))))","=join("" / "",
+counta(iferror(filter(Transformations_Status,regexmatch(Transformations_Status,$E18)))),
+counta(iferror(filter(Minipreps_m_Status,regexmatch(Minipreps_m_Status,$E18)))))",transformations / minipreps m,"=hyperlink(index(settings_DashboardProtocolLinksList,row(A18)-row($A$5)+1),""queue analytical PCR"")",ready to queue analytical PCR,,"=iferror(datedif(DATE_YYMMDD(max(Analytical_PCR_queue_date)),today(),""D""))",as needed,2 min each,,14,remote,queueing in CC,"=xmatch(M18,unique($M$5:$M$29))"
+"=counta(iferror(filter(Analytical_PCR_Status,Analytical_PCR_Priority,regexmatch(Analytical_PCR_Status,$E19))))","=counta(iferror(filter(Analytical_PCR_Status,regexmatch(Analytical_PCR_Status,$E19))))",analytical PCR,"=hyperlink(index(settings_DashboardProtocolLinksList,row(A19)-row($A$5)+1),""set up analytical PCR"")",ready to set up,"=counta(iferror(filter(Analytical_PCR_Status,regexmatch(Analytical_PCR_Status,""wait""))))","=iferror(datedif(DATE_YYMMDD(max(Analytical_PCR_done_date)),today(),""D""))","8, 16, 32...",1 h for 16,,15,bench,"pipetting, tube strips","=xmatch(M19,unique($M$5:$M$29))"
+"=join("" / "",counta(iferror(filter(Minipreps_m_Status,Minipreps_m_Priority,regexmatch(Minipreps_m_Status,$E20))))+
+counta(iferror(filter(dsDNA_d_Status,dsDNA_d_Priority,regexmatch(dsDNA_d_Status,$E20)))),
+counta(iferror(filter(Analytical_PCR_Status,Analytical_PCR_Priority,regexmatch(Analytical_PCR_Status,$E20)))))","=join("" / "",counta(iferror(filter(Minipreps_m_Status,regexmatch(Minipreps_m_Status,$E20))))+
+counta(iferror(filter(dsDNA_d_Status,regexmatch(dsDNA_d_Status,$E20)))),
+counta(iferror(filter(Analytical_PCR_Status,regexmatch(Analytical_PCR_Status,$E20)))))",prepped samples / analytical PCRs,"=hyperlink(index(settings_DashboardProtocolLinksList,row(A20)-row($A$5)+1),""load prepped samples, run gel, image gel"")",ready to run gel,,"=iferror(datedif(DATE_YYMMDD(max(max(dsDNA_d_Date_gel_run),max(Minipreps_m_Date_gel_run),max(Analytical_PCR_gel_run_date))),today(),""D""))",all samples ready / full gel,1.5 h,,16,bench,gel use,"=xmatch(M20,unique($M$5:$M$29))"
+"=join("" / "",
+counta(iferror(filter(dsDNA_d_Status,dsDNA_d_Priority,regexmatch(dsDNA_d_Status,$E21)))),
+counta(iferror(filter(Minipreps_m_Status,Minipreps_m_Priority,regexmatch(Minipreps_m_Status,$E21)))),
+counta(iferror(filter(Analytical_PCR_Status,Analytical_PCR_Priority,regexmatch(Analytical_PCR_Status,$E21)))))","=join("" / "",
+counta(iferror(filter(dsDNA_d_Status,regexmatch(dsDNA_d_Status,$E21)))),
+counta(iferror(filter(Minipreps_m_Status,regexmatch(Minipreps_m_Status,$E21)))),
+counta(iferror(filter(Analytical_PCR_Status,regexmatch(Analytical_PCR_Status,$E21)))))",d / m / analytical PCR,"=hyperlink(index(settings_DashboardProtocolLinksList,row(A21)-row($A$5)+1),""analyze previously run gel"")",ready to code gel,,"=iferror(datedif(DATE_YYMMDD(max(max(dsDNA_d_date_gel_coded),max(Minipreps_m_date_gel_coded),max(Analytical_PCR_gel_code_date))),today(),""D""))",anything ready,15 min per row,,17,remote,gel and cloning concepts,"=xmatch(M21,unique($M$5:$M$29))"
+"=counta(iferror(unique(filter(Minipreps_m_Construct_name,Minipreps_m_Priority,regexmatch(Minipreps_m_Status,$E22)))))","=counta(iferror(unique(filter(Minipreps_m_Construct_name,regexmatch(Minipreps_m_Status,$E22)))))","minipreps m
+(# constructs)","=hyperlink(index(settings_DashboardProtocolLinksList,row(A22)-row($A$5)+1),""queue sequencing"")",ready to queue sequencing,,"=iferror(datedif(DATE_YYMMDD(max(Sequencing_Date_queued)),today(),""D""))",anything ready,5 min each,,18,remote,queueing in CC,"=xmatch(M22,unique($M$5:$M$29))"
+"=counta(iferror(filter(Sequencing_Status,Sequencing_Priority,regexmatch(Sequencing_Status,$E23),regexmatch(Sequencing_Sequencing_type,""Sanger""))))
+&"" / ""&
+counta(iferror(filter(Sequencing_Status,Sequencing_Priority,regexmatch(Sequencing_Status,$E23),regexmatch(Sequencing_Sequencing_type,""Whole-plasmid""))))","=counta(iferror(filter(Sequencing_Status,regexmatch(Sequencing_Status,$E23),regexmatch(Sequencing_Sequencing_type,""Sanger""))))
+&"" / ""&
+counta(iferror(filter(Sequencing_Status,regexmatch(Sequencing_Status,$E23),regexmatch(Sequencing_Sequencing_type,""Whole-plasmid""))))","sequencing
+Sanger / whole-plasmid","=hyperlink(index(settings_DashboardProtocolLinksList,row(A23)-row($A$5)+1),""mix sequencing samples"")",ready to mix,"=counta(iferror(filter(Sequencing_Status,Sequencing_Date_shipped="""",regexmatch(Sequencing_Sequencing_type,""Sanger""))))
+&"" / ""&
+counta(iferror(filter(Sequencing_Status,Sequencing_Date_shipped="""",regexmatch(Sequencing_Sequencing_type,""Whole-plasmid""))))","=iferror(datedif(DATE_YYMMDD(max(Sequencing_Date_mixed)),today(),""D""))",anything ready,20 min / 8,,19,bench,"pipetting, tube strips","=xmatch(M23,unique($M$5:$M$29))"
+"=counta(iferror(filter(Sequencing_Status,Sequencing_Priority,regexmatch(Sequencing_Status,$E24))))","=counta(iferror(filter(Sequencing_Status,regexmatch(Sequencing_Status,$E24))))",sequencing,"=hyperlink(index(settings_DashboardProtocolLinksList,row(A24)-row($A$5)+1),""align sequencing reads to maps"")",ready to align,,"=iferror(datedif(DATE_YYMMDD(max(Sequencing_Date_aligned_alignment)),today(),""D""))",anything ready,2 min each,,20,remote,construct management software,"=xmatch(M24,unique($M$5:$M$29))"
+"=counta(iferror(filter(Sequencing_Status,Sequencing_Priority,regexmatch(Sequencing_Status,$E25))))","=counta(iferror(filter(Sequencing_Status,regexmatch(Sequencing_Status,$E25))))",sequencing,"=hyperlink(index(settings_DashboardProtocolLinksList,row(A25)-row($A$5)+1),""interpret sequencing"")",ready to interpret,,"=iferror(datedif(DATE_YYMMDD(max(Sequencing_Date_alignment_interpreted)),today(),""D""))",anything ready,variable,,21,remote,"construct management software, cloning concepts","=xmatch(M25,unique($M$5:$M$29))"
+"=counta(iferror(filter(Minipreps_m_Status,regexmatch(Minipreps_m_Status,$E26),Minipreps_m_Priority)))","=counta(iferror(filter(Minipreps_m_Status,regexmatch(Minipreps_m_Status,$E26))))",minipreps m,"=hyperlink(index(settings_DashboardProtocolLinksList,row(A26)-row($A$5)+1),""transform for strain storage"")",ready to transform for strain storage,,"=iferror(datedif(DATE_YYMMDD(max(Minipreps_m_Date_transformed)),today(),""D""))",8 (16 at most),3 h / 8 to 16,,22,bench,comp cell & Petri dish use,"=xmatch(M26,unique($M$5:$M$29))"
+"=counta(iferror(filter(Minipreps_m_Status,regexmatch(Minipreps_m_Status,$E27),Minipreps_m_Priority)))","=counta(iferror(filter(Minipreps_m_Status,regexmatch(Minipreps_m_Status,$E27))))",minipreps m,"=hyperlink(index(settings_DashboardProtocolLinksList,row(A27)-row($A$5)+1),""inoculate overnight for storage"")",ready to inoculate for strain storage,,"=iferror(datedif(DATE_YYMMDD(max(Minipreps_m_Date_inoculated_for_storage)),today(),""D""))","8, 16, or 24",30 min / 8,,23,bench,inoculation,"=xmatch(M27,unique($M$5:$M$29))"
+"=counta(iferror(filter(Minipreps_m_Status,regexmatch(Minipreps_m_Status,$E28),Minipreps_m_Priority)))","=counta(iferror(filter(Strains_s_Status,regexmatch(Strains_s_Status,$E28))))",strains s,"=hyperlink(index(settings_DashboardProtocolLinksList,row(A28)-row($A$5)+1),""store overnight culture as new strain"")",ready to store,,"=iferror(datedif(DATE_YYMMDD(max(Strains_s_Date_stored)),today(),""D""))","8, 16, or 24",30 min / 8,,24,bench,"pipetting, tube strips","=xmatch(M28,unique($M$5:$M$29))"
+,"=counta(iferror(filter(Experiments_Status,regexmatch(Experiments_Status,$E29))))",experiments e,"=hyperlink(index(settings_DashboardProtocolLinksList,row(A29)-row($A$5)+1),""test and learn from constructs"")",ready to start,"=counta(iferror(filter(Experiments_Status,regexmatch(Experiments_Status,""[Ww]ait""))))","=iferror(datedif(DATE_YYMMDD(max(Experiments_Date_started)),today(),""D""))",anything ready,variable,,25,bench,scientific method,"=xmatch(M29,unique($M$5:$M$29))"
+,,,,,,,,,,,,,
+"=counta(iferror(filter(Oligos_o_Status,regexmatch(Oligos_o_Status,""ready to order""),not(Oligos_o_dsDNA_or_ultramer?),Oligos_o_Length<=settings_oOligoSynthScaleChangeLen)))","=""oligos are ready to order, length ≤ ""&settings_oOligoSynthScaleChangeLen",,,,,,,,,,,,
+"=counta(iferror(filter(Oligos_o_Status,regexmatch(Oligos_o_Status,""ready to order""),not(Oligos_o_dsDNA_or_ultramer?),Oligos_o_Length>settings_oOligoSynthScaleChangeLen)))","=""oligos are ready to order, length > ""&settings_oOligoSynthScaleChangeLen",,,,,,,,,,,,
+"=counta(iferror(filter(Oligos_o_Status,regexmatch(Oligos_o_Status,""ready to order""),Oligos_o_dsDNA_or_ultramer?)))",dsDNA or ultramers are ready to order,,,,,,,,,,,,
+"=counta(iferror(filter(Sequencing_Status,regexmatch(Sequencing_Sequencing_type,""Sanger""),(regexmatch(Sequencing_Status,""mixed, waiting""))+(regexmatch(Sequencing_Status,""ready to mix"")))))",sequencing rxns are queued/mixed for Sanger,,,,,,,,,,,,
+"=counta(iferror(filter(Sequencing_Status,regexmatch(Sequencing_Sequencing_type,""Sanger""),regexmatch(Sequencing_Status,""mixed, waiting""))))",sequencing rxns are ready to submit for Sanger,,,,,,,,,,,,
+"=counta(iferror(filter(Sequencing_Status,regexmatch(Sequencing_Sequencing_type,""Whole-plasmid""),(regexmatch(Sequencing_Status,""mixed, waiting""))+(regexmatch(Sequencing_Status,""ready to mix"")))))",sequencing rxns are queued/mixed for whole-plasmid sequencing,,,,,,,,,,,,
+"=counta(iferror(filter(Sequencing_Status,regexmatch(Sequencing_Sequencing_type,""Whole-plasmid""),regexmatch(Sequencing_Status,""mixed, waiting""))))",sequencing rxns are ready to submit for whole-plasmid sequencing,,,,,,,,,,,,
+,,,,,,,,,,,,,
+CC News,"=iferror(
+importrange(""https://docs.google.com/spreadsheets/d/1ZbxP-biSId8Eew6_NrZUpF_8d-fAk6yxePkbPMaR9lw"",""CCNews""),
+""Problem fetching news - try refreshing the page, or it may be a temporary Google server outage"")",,,,,,,,,,,,
+,,,,,,,,,,,,,
+"=iferror(importrange(""https://docs.google.com/spreadsheets/d/1ZbxP-biSId8Eew6_NrZUpF_8d-fAk6yxePkbPMaR9lw"",""CCNewsDate""))",,,,,,,,,,,,,
+"=iferror(""(""&
+datedif(DATE_YYMMDD(A41),today(),""D"")
+&"" days ago)"")",,,,,,,,,,,,,

@@ -1,0 +1,128 @@
+Registry,,,,1. Construct properties,,,2. Queueing,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,3. Troubleshooting,,,,,,,,,,,,,,,4. Associated data,,,,,,,,,,,,,,,,,,,formula-related cells >,,,
+"=iferror(if(join("","",filter(A3:A,A3:A<>""""))<>join("","",sequence(max(A3:A))),
+""ERROR near #""&index(filter(sort(A3:A,1,TRUE),sort(A3:A,1,TRUE)<>sort(row(A3:A)-2,1,TRUE)),1)-1&""!"", 
+""Serial #""),""Serial #"")","={""ID"";arrayformula(if(A3:A<>"""",""r""&A3:A,""""))}","Construct name
+(or oID/dID)",Status,Status origin,What to do with this construct?,General notes,Date registered,Registered by,Flag all related samples as high priority?,Person responsible,Direct receipt?,Sequence,Size (kb),Marker 1,Marker 2,Specific growth conditions,Color,Compatibility group/origin family,Origin of replication details,Project,"Design notes, description / purpose",Golden Gate donor?,Sequencing primer(s) needed to verify,Certify correctly registered,Registration validity check,Suggested sequencing method,GG collection,GG enzyme,GG part description (short text),Duplicate of existing part?,5' junction (5'→3'),3' junction (5'→3'),GG parts Manual sort,Forward primer for analytical PCR: forward near 3' end,Reverse primer for analytical PCR: reverse near 5' end,"Part length (long, >100 bp)",Date debugged 1,Debugged by 1,Debug description 1,Date debugged 2,Debugged by 2,Debug description 2,Date debugged 3,Debugged by 3,Debug description 3,Date debugged 4,Debugged by 4,Debug description 4,Date debugged 5,Debugged by 5,Debug description 5+,Priority as component?,Date Completed (mID sequencing alignment),Marker,Stock to use for GG,Conc (nkµ),GG Stock Est. Vol. Left,oID,dID,aID,gID,mID,sID,Verified mID,Verified mID from sID,Incomplete construct has no active person responsible?,Currently needs sequencing?,GG rID composition,"GG success, this rID?","GG success, current GG stock mID?","GG parts display name (rID, description, construct, slot description, enzyme, 5' junction, 3' junction)",GG display name unique?,Has an approved duplicate entered further down?,Priority-flagged construct IDs
+1,r1,,"=if(C3="""","""",
+if(not(Y3),""Finish registering!"",
+split(
+ifs(
+regexmatch(F3,""hold""),""Held (no actions)""&""|""&""Registry"",
+regexmatch(F3,""♥""),""Complete ♥""&""|""&""Registry"",
+F3<>"""",F3&""|""&""Registry"",
+regexmatch(C3,""^[od]\d+""),""Not construct""&""|""&"""",
+L3=""yes"",ifs(
+  BK3="""",if(BL3="""",""Registered"",""Complete ♥""),
+  TRUE,if(join("""",bycol(split(BK3,"",""),lambda(x,if(x<>"""",index(Minipreps_m_Date_purified,ID_TO_INDEX(x)),""""))))<>"""",
+    ""Complete ♥""&char(10)&""(direct receipt)""&""|""&""Registry"",""Wait on stock""&""|""&""Minipreps m"")),
+BM3<>"""",""Complete ♥""&""|""&""Minipreps m"",
+countblank(BG3:BJ3)=4,""Registered"",
+BQ3<>"""",if(countif($BQ$3:$BQ,""=""&BQ3)>1,join("" "",filter($C$3:$C,$BQ$3:$BQ=BQ3,$A$3:$A<>A3))&"" duplicate?"",""Queued""&""|""&""""),
+TRUE,""Queued""&""|""&"""")
+,""|"")))",,,,,,false,,,,,,,,,,,,,,,false,"=ifs(
+C3="""","""",
+Y3,""Certified OK"",
+countif(C:C,""=""&C3)>1,""already registered / duplicate name! see ""&join("" "",filter(Registry_ID,Registry_Construct_name=C3,Registry_ID<>B3)),
+regexmatch(C3,""^[od]""),
+if(W3<>"""",
+  if(W3=""no"",""oID/dID should only need to be registered if GG donor?"",
+  let(cats,iferror(filter({AB$2:AG$2},{AB3:AG3}=""""),FALSE),if(cats=FALSE,""✓ No registration errors found"",""enter ""&join(""; "",cats)&""!""))),""Indicate GG donor?""),
+
+true,
+if(and(L3=""no"",settings_RegistryWarnIfNotpABC123),if(regexmatch(C3,""^p[A-Z]{3}\d{3}$""),"""",""Invalid construct name?""&char(10)),"""")&
+let(
+main_headers,{C$2,H$2,I$2,K$2,L$2,N$2,O$2,R$2,S$2,U$2,W$2,X$2},
+main_entries,{C3,H3,I3,K3,L3,N3,O3,R3,S3,U3,W3,X3},
+donor_additional_headers,{AB$2:AG$2,AK$2},
+donor_additional_entries,{AB3:AG3,AK3},
+let(output,join("", "",
+iferror(filter(main_headers,main_entries=""""),""■""),
+if(W3=""no"",""□"",iferror(filter(donor_additional_headers,donor_additional_entries=""""),""□""))
+),
+if(and(regexmatch(output,""■""),regexmatch(output,""□"")),""✓ No registration errors found"",""Missing entries: ""&char(10)&substitute(substitute(output,""■,"",""""),""□"",""""))
+))
+)","=if(C3="""","""",
+iferror(ifs(
+BJ3<>"""",""GG: verify parts present"",
+($N3 -settings_RegistryExpectedMinSizeBackbone)/settings_RegistrySangerReadAverageBases * settings_RegistrySangerReadCost > settings_RegistryWholePlasmidSeqCost, ""Whole plasmid sequencing"", 
+TRUE,""Sanger"")))",,,,false,,,,,,,,,,,,,,,,,,,,,,"=and(
+A3<>"""",
+iferror(regexmatch(Registry_Priority_flagged_component_rIDs,"",""&B3&"",""),FALSE))","=ifs(
+A3="""","""",
+L3=""yes"","""",
+not(regexmatch(D3,""♥"")),"""",
+TRUE,
+iferror(index(sort(filter(Sequencing_Date_alignment_interpreted,regexmatch("",""&substitute(BM3,"" "","","")&"","","",""&Sequencing_Source_ID&"",""))),1)))","=if(P3="""",O3,O3&"",""&P3)","=if(or(C3="""",W3<>""yes""),"""",
+switch(left(C3),
+ ""o"",iferror(if(regexmatch(index(Oligos_o_Status, xmatch(C3, Oligos_o_ID)), ""done""), C3, """")),
+ ""d"",iferror(if(regexmatch(index(dsDNA_d_Status, xmatch(C3, dsDNA_d_ID)), ""done""), C3, """")),
+ iferror(
+  query({
+   byrow(iferror(filter({Minipreps_m_ID,Minipreps_m_Date_purified,Minipreps_m_Conc},Minipreps_m_Construct_name=C3,Minipreps_m_OK_to_use_for_GG)),
+    lambda(row,{index(row,1),index(row,2),index(row,3)=""""}))}
+  ,""select Col1 order by Col3, Col2 desc limit 1 label Col1 ''"")
+  ,"""")
+))","=if(BD3="""","""",
+switch(left(BD3),
+""o"",settings_gOligoDonorDefaultConcentration/$N3,
+""d"",iferror(filter('dsDNA d'!$CJ$3:$CJ,'dsDNA d'!$B$3:$B=BD3,'dsDNA d'!$BD$3:$BD<>"""")),
+""m"",iferror(index(Minipreps_m_Conc_nku,xmatch(BD3,Minipreps_m_ID)), ""???""),
+""""))","=if(
+$BD3="""", """", 
+switch( 
+left($BD3),
+""m"", index(Minipreps_m_Volume_left,xmatch($BD3,Minipreps_m_ID)),
+""o"", """",
+""d"", index(dsDNA_d_Volume_left,xmatch($BD3,dsDNA_d_ID))
+)
+)","=if(BH3="""","""",
+join("","",unique(split(join("","",bycol(split(BH3,"",""),
+lambda(row,join("","",lambda(x,iferror(filter(x,x<>"""")))(index({dsDNA_d_Oligo_1,dsDNA_d_Oligo_2},xmatch(row,dsDNA_d_ID))))))),"","",TRUE,TRUE),TRUE,FALSE)))","=if(BI3="""","""",
+iferror(join("","",unique(split(join("","",bycol(split(BI3,"",""),
+lambda(row,join("","",lambda(x,iferror(filter(x,x<>"""")))(index(Assemblies_a_Parts,match(row,Assemblies_a_ID,0),)))))),"","",TRUE,TRUE),TRUE,FALSE)),""""))","=if(C3="""","""",
+IFERROR(
+join("","",sort(filter(Assemblies_a_ID,Assemblies_a_Construct_name=C3),1,FALSE))
+,""""))","=if(C3="""","""",
+IFERROR(
+join("","",sort(filter(Golden_Gate_g_ID,Golden_Gate_g_Construct_name=C3),1,FALSE))
+,""""))","=if(C3="""","""",
+IFERROR(
+join("","",sort(filter(Minipreps_m_ID,Minipreps_m_Construct_name=C3),1,FALSE))
+,""""))","=IF(C3="""","""",
+IFERROR(INDEX('Strains s'!B:B,MATCH(C3,'Strains s'!M:M,0)))
+)","=ifs(C3="""","""",
+BK3="""","""",
+TRUE,trim(reduce("""",split(BK3,"", ""),
+lambda(out,x,
+if(x="""",out,
+if(index(Minipreps_m_Verified_construct?,ID_TO_INDEX(x)),if(out="""",x,out&"",""&x),out))))))","=ifs(C3="""","""",
+BM3="""","""",
+TRUE,trim(reduce("""",split(BM3,"", ""),
+lambda(out,x,
+if(x="""",out,
+if(left(index(Minipreps_m_Source_ID,ID_TO_INDEX(x)))=""s"",if(out="""",x,out&"",""&x),out))))))","=if(A3="""","""",
+if(and(or(D3=""Queued"",D3=""Registered""),iferror(index(filter({settings_DashboardRoster,settings_DashboardMemberActive?},regexmatch(settings_DashboardRoster,K3)),2),FALSE)<>TRUE),""no active person responsible"",""""))","=ifs(
+C3="""",FALSE,
+regexmatch(D3,""♥""),FALSE,
+regexmatch(D3,""⛔""),FALSE,
+regexmatch(Lookup_lists_and_tabulations_Sequencing_queued_constructs,C3),FALSE,
+L3=""yes"",FALSE,
+TRUE,TRUE)","=if(BJ3="""","""",
+join("","",
+sort(
+let(rIDs,transpose(index(Golden_Gate_g_Part_rID_Table,ID_TO_INDEX(index(split(BJ3,"",""),1)))),
+filter(rIDs,rIDs<>""""))
+)))","=if($A1="""","""",
+if(and($B3<>"""",regexmatch('(Lookup lists & tabulations)'!$B$3,$B3&""\,"")),""yes"","""")
+)","=if($A1="""","""",
+if(and(BD3<>"""",regexmatch('(Lookup lists & tabulations)'!$B$4,BD3&""\,"")),""yes"","""")
+)","=if(B3="""","""",
+substitute(if(W3<>""yes"","""",
+B3&"" ""&AD3&iferror(if(BM3<>"""",if(BD3<>"""","" /READY/"","" /reprep/""),""""))&if(BR3<>"""", "" ✓ "","""")&"" ""&C3&"" (""&AC3&"" ""&AF3&""-""&AG3&"")""),""'"",""`""))","=if(BT3="""","""",
+countif(BT$3:BT,""=""&BT3)=1)","=if(BT3="""","""",
+counta(iferror(filter(BT3:BT,BT3:BT=BT3,AE3:AE=TRUE)))>0)","=ifs(
+A3="""","""",
+and(D3=""Queued"",or(J3,BA3)),
+ join("","",BG3,BH3,BI3,BJ3,BK3),
+BA3,BK3,
+TRUE,"""")"

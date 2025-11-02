@@ -1,0 +1,274 @@
+Minipreps m,,,,,,1. Sample properties,,,,,,,,,,2. Queueing,,"=hyperlink(""https://docs.google.com/spreadsheets/d/1I2RFVfZp7SELgt65I9a8CgkF15clonKvlFgq4ZidMbw/edit#gid=233849106"",""m Queuer"")",,,,,,,,,3. Inoculation,,,,,,,"={""Default:"",settings_mDefaultMedia}",LB,"={""Default:"",settings_mDefaultCultureVolume}",4,,,,4. Miniprep,,,,"={""Default:"",settings_mDefaultPurificationMethod,settings_mStandardElutionVolume}","Qiagen columns, Qiagen buffers",100,5. Quantitation,,,,,,6a. Gel prep & run,,,,6b. Gel coding,,={'dsDNA d'!BR1:BT1},,,,,,,7. Sequencing data,,,,,,,8. Strain storage,,,,,,,"formula-related cells >
+(don't modify unless you know what you're doing)",,,,,,,,,,,,,,,,,,,,,,,,
+"=iferror(if(join("","",filter(A3:A,A3:A<>""""))<>join("","",sequence(max(A3:A))),
+""ERROR near #""&index(filter(sort(A3:A,1,TRUE),sort(A3:A,1,TRUE)<>sort(row(A3:A)-2,1,TRUE)),1)-1&""!"", 
+""Serial #""),""Serial #"")","={""ID"";arrayformula(if(A3:A<>"""",""m""&A3:A,""""))}","={if(regexmatch(settings_SampleStoragePlateSize,""b""),""Box"",""Well"");arrayformula(if(A3:A="""","""",ID_TO_WELL(settings_SampleStoragePlateSize,B3:B)))}",Sort #,Construct name,Status,"Priority
+?",What to do with this sample?,General notes,Exclude from analysis?,Don't store?,Don't use as GG donor?,Manual vol used adjust (µL),Volume used,Volume left (est.),Conc in nkµ (ng/kb/µL),Date queued,Queued by,Source ID (tagmsr),Colony stock #,Queue notes,Quant priority,Gel priority,Analytical PCR priority,Certify correctly queued,Source of tID,Queueing validity check,Intended color,Plate status,Marker,Specific growth conditions,plate #,24w plate well,Inoculated colony size (if notable),Inoculated colony color (if notable),Culture media,Culture antibiotic,Culture volume (mL),Actual growth conditions (if notable),Date inoculated,Inoculated by,Grew?,"Growth
+/color notes",Date purified & placed in m plate,Purified by,Purification notes,Purification method,Elution volume (µL),Date quantified,Quantified by,Quant method,A260/ A280,A260/ A230,Conc (ng/µL),Date gel sample prepped,Gel sample prep by,Date gel run & imaged,Gel run & imaged by,Date gel coded,Gel coded by,Gel band information,Gel intensity (main/desired band),Gel ladder,"Gel nearest ladder band (kb)
+""1/2"" = between 1 and 2 kb",Size (kb),Gel size interpretation (main/desired band): plasmids run ~0.5 kb slow,Gel notes,Gel data (only) predicts this prep was correctly assembled?,Status of queued analytical PCR,Analytical PCR overall outcome,Outcomes of individual analytical PCRs,Is sequencing appropriate?,Date sequencing submitted,"={""Compiled sequencing results"";byrow(A3:A,lambda(num,
+if(num="""","""",
+iferror(join(""
+"",filter(Sequencing_Alignment_summary,Sequencing_Source_ID=""m""&num))))))}",Stored prep?,Should be stored?,Date transformed for storage,Transformed for storage by,Date inoculated for storage,Inoculated for storage by,Strain storage notes,"Prep from sequence
+-verified construct?",Prep verified and available?,OK to use for Golden Gate assemblies?,Assembly components with same marker as construct,"Sequencing <> Minipreps ""What to do with this?"" integration",Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max),Ladder band options (20 max)
+1,m1,m01.A01,,"=if(S3="""","""",
+GET_CONSTRUCT_NAME_BY_ID(S3))","=if(A3="""","""",
+let(source_ID,if(iferror(left(S3)=""t"",FALSE),index(Transformations_Source_ID,ID_TO_INDEX(S3)),S3),
+trim(ifs(
+not(Y3),""certify queueing!"",
+
+FALSE,""Note: parts of the next block are duplicated in 'Prep from sequence-verified construct?'"",
+FALSE,""Read manual status assignments from the column that integrates these with any assigned in Sequencing"",
+CH3=""! Conflicting manual statuses assigned to different instances of this mID in Sequencing!"",CH3,
+regexmatch(CH3,""⛔""),CH3,
+regexmatch(CH3,""(hold)""),""wait; held""&if(H3="""","" (from Sequencing)"",""""),
+and(BB3<>"""",BB3<settings_QCLowMiniprepConcCutoff),""Failed: low conc! ⛔"",
+regexmatch(iferror(index(Registry_Manual_status_assignment,xmatch(E3,Registry_Construct_name))),""[Aa]bandon""),""construct abandoned"",
+regexmatch(iferror(index(Registry_Manual_status_assignment,xmatch(E3,Registry_Construct_name))),""(hold)""),""construct held"",
+AP3=""no"",""stalled - did not grow"",
+AR3<>"""",
+     if(O3<=settings_mMinVolumeLeft,""Ran out ⛔"",
+     ""done""&
+     if(regexmatch(CH3,""(hold)""),char(10)&""wait; held""&if(H3="""","" (from Sequencing)"",""""),"""")&
+     if(AP3=""unexpected color/phenotype"",char(10)&""unexpected color/phenotype?"","""")&
+
+     if(and(AW3="""",iferror(xmatch(V3,'Settings & admin'!$BK$35:$BK$41),1.5)>='Settings & admin'!$BK$29),char(10)&""ready to quant"","""")&
+     if(let(threshold,if(left(source_ID)=""a"",settings_aIDMiniprepAnalyticalPCRThreshold,settings_gIDMiniprepAnalyticalPCRThreshold),
+        iferror(xmatch(X3,settings_QCPriorityList),1.5)>=threshold),
+       if(BQ3="""",char(10)&""ready to queue analytical PCR"",if(regexmatch(BQ3,""progress""),char(10)&""analytical PCR pending"","""")),"""")&
+     if(and(BC3="""",iferror(xmatch(W3,'Settings & admin'!$BK$35:$BK$41),1.5)>='Settings & admin'!$BK$27),char(10)&""ready to prep gel sample"",
+      if(and(BC3<>"""",BE3=""""),char(10)&""ready to run gel"",
+      if(and(BE3<>"""",BH3=""""),char(10)&""ready to code gel"","""")))&
+     if(and(
+         iferror(index(Registry_Needs_sequencing?,xmatch(E3,Registry_Construct_name)),FALSE),
+         if(settings_SequencingRequireQuant?,BB3<>"""",TRUE),
+         if(settings_SequencingRequireGel?,BG3<>"""",TRUE),
+         if(settings_SequencingRequireAnalyticalPCR?,or(BQ3="""",regexmatch(BQ3,""done"")),TRUE),
+         if(and(settings_gIDMiniprepSequencingRequireAnalyticalPCR?,left(source_ID)=""g""),if(BQ3<>""done"",FALSE,TRUE),TRUE),
+         if(and(settings_aIDMiniprepSequencingRequireAnalyticalPCR?,left(source_ID)=""a""),if(BQ3<>""done"",FALSE,TRUE),TRUE),
+         not(regexmatch(BT3,""[Dd]o not""))
+         )
+       ,char(10)&""ready to queue sequencing""&if(regexmatch(BT3,""[Cc]heck""),char(10)&""(""&BT3&"")"",""""),"""")&
+   if(and(O3<=settings_mWarnVolumeLeft,O3>settings_mMinVolumeLeft),char(10)&""vol low?"","""")&
+   if(and(BB3<>"""",BB3<settings_QCLowMiniprepConcWarn),char(10)&""low conc?"","""")&
+
+   if(lambda(x,
+      iferror(match(""Problem"",x,0)))
+    (iferror(unique(
+     {index(settings_GelCodingQualityFlags,match(BI3,settings_GelCodingQuality,0)),
+     index(settings_GelCodingIntensityFlags,match(BJ3,settings_GelCodingIntensity,0))
+     })))
+   ,char(10)&""gel problem?"","""")&
+
+ifs(
+              and(regexmatch(settings_mAutomaticReadyToTransformOption,""auto""),$BW3="""",$K3=FALSE,BX3=""yes"",BY3=""""), char(10)&""ready to transform for strain storage"",
+              and(regexmatch(settings_mAutomaticReadyToTransformOption,""only""),$BW3="""",$K3=FALSE,BX3=""yes"",BY3=""""), if(regexmatch(CH3,""(store this prep)""),char(10)&""ready to transform for strain storage"",""""),
+              TRUE,"""")&
+   if(and(BY3<>"""",CA3=""""),char(10)&""ready to inoculate for strain storage"",""""))
+,
+and(AK3<>"""",not(regexmatch(AD3,AK3))),""wrong antibiotic used! stalled"",
+and(AN3<>"""",AR3="""",AP3<>""no""),if(iferror(let(diff,datedif(DATE_YYMMDD(AN3),today(),""D""),and(diff>=1,diff<3)),TRUE),""ready to miniprep"",if(datedif(DATE_YYMMDD(AN3),today(),""D"")>settings_mCultureAge,""culture is too old - need a new culture for miniprep"",""wait for growth, miniprep tomorrow"")),
+iferror(regexmatch(if(left(S3)=""t"",index(Transformations_What_to_do_with_this,ID_TO_INDEX(S3)),index(Transformations_What_to_do_with_this,xmatch(S3,Transformations_Source_ID,0,-1))),""⛔"")),""transformation problem!"",
+and(or(left(source_ID)=""a"",left(source_ID)=""g""),A3<>"""",AN3=""""),
+   switch(AC3,
+   ""not transformed!"",""wait on transformation"",
+   ""no plate available!"",""plate not available; retransform"",
+   ""no colonies!"",""no colonies on transformation plate; retransform"",
+   ""age questionable?"",""ready to inoculate (check plates first)"",
+   ""OK"",""ready to inoculate for miniprep"",
+   """",""???""),
+and(left(source_ID)=""s"",A3<>"""",AN3=""""),
+   if(index(Strains_s_Date_stored,ID_TO_INDEX(source_ID))="""",""wait on strain"",""ready to inoculate for miniprep""),
+source_ID="""","""",
+TRUE,""stalled"")&if(G3,"" (priority)"","""")
+)
+&
+ifs(iferror(
+         and(left(source_ID)=""s"",
+         AR3<>"""",
+         index(Strains_s_Storage_strain?,ID_TO_INDEX(source_ID)),
+         not(regexmatch(index(Strains_s_Status,ID_TO_INDEX(source_ID)),""⛔"")),
+         not(regexmatch(CH3,""⛔""))),FALSE)
+          ,char(10)&""♥ verified"",
+    iferror(left(source_ID)=""r"",FALSE), char(10)&""♥ verified"",
+    iferror(regexmatch(CH3,""♥""),FALSE),
+      iferror(if(regexmatch(BV3,""All parts verified present""),char(10)&""♥ verified""&if(H3="""","" (from Sequencing)"",""""),char(10)&""♥ verified""&if(H3="""","" (from Sequencing)"","""")&char(10)&""sequencing data inconsistent/incomplete for verification?""),""""),
+
+TRUE,""""
+))&let(
+entry_list, {$Q3:$S3,$Y3,$AJ3:$AL3,$AN3:$AP3,$AR3:$AS3,$AU3:$AV3,$BY3:$CB3},
+ifs(
+index(entry_list,1)="""","""",
+NOT(regexmatch(join(""◆"",entry_list),""[^◆]◆{2,}[^◆]"")),"""",
+true,char(10)&""missing data?""
+)))","=if(A3="""","""",
+iferror(or(and(B3<>"""",iferror(regexmatch(Registry_Priority_flagged_IDs,B3&"",""))),regexmatch(CH3,""(priority)""))))",,,,false,false,,"=if($AR3="""","""",
+if(AW3<>"""",settings_QCQuantitationVolume,0)+
+if(BE3<>"""",settings_QCGelSampleVolume,0)+
+sum(arrayformula(value(iferror(filter(Sequencing_Vol_template,Sequencing_Source_ID=$B3,Sequencing_Date_mixed<>"""")))))+
+1.1*ifna(index('(Lookup lists & tabulations)'!$O$3:O,xmatch(B3,'(Lookup lists & tabulations)'!$N$3:$N)))+
+$M3
+)","=ifs($AR3="""","""",
+$AV3<>"""",$AV3-$N3,
+TRUE,settings_mStandardElutionVolume-$N3)","=iferror(if(BB3="""","""",BB3/index(Registry_Construct_size,match(E3,Registry_Construct_name,0))))",,,,,,,,,false,"=if(A3="""","""",if(left(S3)=""t"",index(Transformations_Source_ID,ID_TO_INDEX(S3)),""""))","=ifs(
+A3="""","""",
+Y3,""Certified OK"",
+Q3="""",""enter date queued!"",
+R3="""",""enter queued by!"",
+S3="""",""enter source ID!"",
+not(DOES_ID_EXIST(""tagmrs"",S3)),""source ID not not found!"",
+let(plasmid,trim(E3),or(plasmid=""none"",plasmid="""",plasmid=""-"",plasmid=""no plasmid"",plasmid=""no"")),""source strain has no plasmid!"",
+TRUE,""✓ No queueing errors found"")","=if(or(S3="""",not(Y3)),"""",
+iferror(index(Registry_Color,xmatch(E3,Registry_Construct_name))))","=if(or($A3="""",$AN3<>"""",$S3="""",not(Y3)),"""",
+let(transform_date,
+ switch(left($S3),
+  ""t"",iferror(index(Transformations_Date_transformed,ID_TO_INDEX($S3))),
+  ""a"",iferror(index(Assemblies_a_Date_transformed,ID_TO_INDEX($S3))),
+  ""g"",iferror(index(Golden_Gate_g_Date_transformed,ID_TO_INDEX($S3))),
+  ""s"",""strain"",
+  ""m"","""",
+  ""r"",""direct"",
+),
+ifs(
+  transform_date=""strain"","""",
+  transform_date=""direct"","""",
+  transform_date="""",""not transformed!"",
+  regexmatch(if(left(S3)=""t"",index(Transformations_What_to_do_with_this,ID_TO_INDEX(S3)),join("","",filter(Transformations_What_to_do_with_this,Transformations_Source_ID = S3,Transformations_Date_transformed = transform_date))), ""⛔""), ""no plate available!"",
+  if(left(S3)=""t"",index(Transformations_Colony_counts,ID_TO_INDEX(S3)),join("","",unique(filter(Transformations_Colony_counts,Transformations_Source_ID = S3,Transformations_Date_transformed = transform_date))))=""none"",""no colonies!"",
+  value(datedif(DATE_YYMMDD(transform_date),today(),""D""))>settings_mPlateAge,""age questionable?"",
+  TRUE,""OK"")))","=if(or(A3="""",S3="""",not(Y3)),"""",
+iferror(
+index(Registry_Marker,xmatch(E3,Registry_Construct_name)),
+if(left(S3)=""s"",iferror(index(Strains_s_Resistance,ID_TO_INDEX(S3)),""?""),
+""???"")))","=if(or(A3="""",S3="""",not(Y3)),"""",
+iferror(index(Registry_Specific_growth_condition,xmatch(E3,Registry_Construct_name)),""""))","=if(D3="""","""",floor((D3-1)/24)+1)","=if(D3="""","""",
+char(if(mod(D3,4)=0,4,mod(D3,4))+64)&
+text(ceiling(if(mod(D3,24)=0,6,mod(D3,24)/4)),""0""))",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"=if(E3="""","""",
+iferror(index(Registry!N:N,match(E3,Registry!C:C,0)
+)))",,,"=if(BI3="""","""",
+let(
+compiled_gel_flags,
+iferror(unique(
+{index(settings_GelCodingQualityFlags,match(BI3,settings_GelCodingQuality,0)),
+index(settings_GelCodingIntensityFlags,match(BJ3,settings_GelCodingIntensity,0)),
+index(settings_GelSizeOptionsFlags ,match(BN3,settings_GelSizeOptions,0)),
+index(settings_AnalyticalPCRFlags ,match(BR3,settings_AnalyticalPCRDropdownOptions,0))
+},TRUE
+)),
+ifs(
+and(join("""",compiled_gel_flags)=""OK"", or($AP3="""",$AP3=""yes - color/phenotype CLEARLY match"")), ""yes"",
+or(iferror(match(""Problem"",compiled_gel_flags,0)), $AP3=""unexpected color/phenotype"", $AP3 = ""no""),""no"",
+TRUE,""ambiguous""
+)))","=if($A3="""","""",
+ifs(counta(iferror(filter(Analytical_PCR_ID,Analytical_PCR_ID=$B3,Analytical_PCR_gel_code_date="""")))>0,""yes, in progress"",
+counta(iferror(filter(Analytical_PCR_ID,Analytical_PCR_ID=$B3,Analytical_PCR_gel_code_date<>"""")))>0,""yes, done"",
+true,""""))","=if($BQ3=""yes, done"",
+ifs(
+iferror(substitute(regexextract(BS3,""\d+ didn't work$""),"" didn't work"","""")=regexextract(BS3,""^\d+"")),""all didn't work"",
+CONTAINS(""no"",iferror(filter(Analytical_PCR_gel_success,Analytical_PCR_ID=$B3,Analytical_PCR_gel_code_date<>"""")))=true,""some didn't work"",
+CONTAINS(""ambiguous"",iferror(filter(Analytical_PCR_gel_success,Analytical_PCR_ID=$B3,Analytical_PCR_gel_code_date<>"""")))=true, ""ambiguous"",
+true, ""all worked""),"""")","=if(BQ3=""yes, done"",
+counta(filter(Analytical_PCR_gel_success,Analytical_PCR_ID=B3,Analytical_PCR_gel_code_date<>""""))&"" PCR done ""&char(10)&
+ifs(CONTAINS(""no"",iferror(filter(Analytical_PCR_gel_success,Analytical_PCR_ID=B3,Analytical_PCR_gel_code_date<>"""")))=true,countif((iferror(filter(Analytical_PCR_gel_success,Analytical_PCR_ID=B3,Analytical_PCR_gel_code_date<>""""))),""no"")& "" didn't work"",
+CONTAINS(""ambiguous"",iferror(filter(Analytical_PCR_gel_success,Analytical_PCR_ID=B3,Analytical_PCR_gel_code_date<>"""")))=true, countif(iferror(filter(Analytical_PCR_gel_success,Analytical_PCR_ID=B3,Analytical_PCR_gel_code_date<>"""")),""ambiguous"")&"" ambiguous"",
+true, counta(filter(Analytical_PCR_gel_success,Analytical_PCR_ID=B3,Analytical_PCR_gel_code_date<>""""))&"" PCR worked""),
+"""")","=ifs(
+A3="""","""",
+left(S3)=""r"",""Do not sequence (direct receipt)"",
+left(S3)=""s"",""Do not sequence (prep from strain)"",
+and(BV3<>"""",regexmatch(join("""",unique(byrow({settings_SequencingAlignmentOutcomeOptionsFlags,settings_SequencingAlignmentOutcomeOptions},lambda(x,if(iferror(find(index(x,2),BV3)),index(x,1),""""))))),""Bad"")),
+    ""Do not sequence because it has already failed sequencing"", 
+and(counta(filter(Minipreps_m_Sequencing_results, $S$3:S=$S3)) > 0,regexmatch(join("""", unique(byrow(filter(Minipreps_m_Sequencing_results, $S:S=$S3,Minipreps_m_gel_size=BN3,Minipreps_m_Gel_nearest_ladder_band=BL3), lambda(y, if(y="""","""",JOIN("" "",unique(byrow({settings_SequencingAlignmentOutcomeOptionsFlags,settings_SequencingAlignmentOutcomeOptions},lambda(x,if(iferror(find(index(x,2),y)),index(x,1),"""")))))) )))),""Bad"")), ""Do not sequence this mID because mIDs with similar gel size interpretation failed sequencing"",
+
+FALSE,""If analytical PCRs have been done and worked, assume this is a good candidate regardless of gel and previous sequencing results"",
+BR3=""all worked"",""Likely OK to sequence"",
+or(BR3=""some didn't work"",BR3=""all didn't work""),""Do not sequence"",
+
+FALSE,""The next block of code is also duplicated in 'OK to use for Golden Gate assemblies?'"",
+TRUE, 
+ifs(
+and(BP3=""yes"", $AP3=""yes - color/phenotype CLEARLY match""), ""Likely OK to sequence"",
+or(BP3=""no"", $AP3=""unexpected color/phenotype"", $AP3 = ""no""),""Do not sequence"",
+TRUE,""Check QC data""
+))","=if(A3<>"""",
+join("",
+"",unique(iferror(filter(Sequencing_Date_shipped,Sequencing_Source_ID=B3,Sequencing_Date_shipped<>""""))))
+,"""")",,"=if(E3="""","""",
+iferror(join("","",filter(Strains_s_ID,Strains_s_Plasmid_name=E3,regexmatch(Strains_s_Status,""done""),Strains_s_Storage_strain?))))","=ifs(
+A3="""","""",
+not(settings_mEnforceMaxOnePrepStored?),if(and(regexmatch(CH3,""♥""),not(K3)),""yes"",""""),
+and(regexmatch(CH3,""♥""),not(K3),BW3=""""),
+ let(mIDs_to_store,iferror(filter(Minipreps_m_ID,Minipreps_m_Construct_name=E3,regexmatch(Minipreps_m_What_to_do_integrated_with_Sequencing,""♥""),not(Minipreps_m_Store?))),
+ ifs(
+ counta(mIDs_to_store)=1,""yes"",
+ index(mIDs_to_store,1)=B3,""yes"",
+ TRUE,"""")),
+TRUE,"""")",,,,,,"=ifs(A3="""","""",
+TRUE,regexmatch(
+ifs(
+       FALSE,""Note: the code block below must duplicate that in Minipreps_m_Status"",
+       iferror(
+         and(left(S3)=""s"",
+         index(Strains_s_Storage_strain?,ID_TO_INDEX(S3)),
+         not(regexmatch(index(Strains_s_Status,ID_TO_INDEX(S3)),""⛔"")),
+         not(regexmatch(CH3,""⛔""))),FALSE)
+          ,char(10)&""♥ verified"",
+       iferror(left(S3)=""r"",FALSE), char(10)&""♥ verified"",
+       iferror(regexmatch(CH3,""♥""),FALSE), 
+         iferror(if(regexmatch(BV3,""All parts verified present""),char(10)&""♥ verified""&if(H3="""","" (from Sequencing)"",""""),char(10)&""♥ verified""&if(H3="""","" (from Sequencing)"","""")&char(10)&""sequencing data inconsistent/incomplete for verification?""),""""),
+       TRUE,"""")
+,""♥""))
+","=if(and(CD3=TRUE,ifs(A3="""","""",
+regexmatch(CH3,""⛔""),FALSE,
+and(BB3<>"""",BB3<settings_QCLowMiniprepConcCutoff),FALSE,
+AP3=""no"",FALSE,
+AR3="""",FALSE,
+O3<=settings_mMinVolumeLeft,FALSE,
+TRUE,TRUE)),TRUE,FALSE)","=ifs(A3="""","""",
+not(CD3),FALSE,
+not(CE3),FALSE,
+L3,FALSE,
+and(BB3<>"""",BB3<settings_gMiniprepMinConc),FALSE,
+
+FALSE,""These next lines are similar to Status and could read from it -- 'gel problem?' is the generated flag"",
+FALSE,""Consider whether we want to rule out 'maybe match' preps for phenotype"",
+FALSE,""Setting settings_gGelProblemBarsUseAsDonor decides whether to use gel data to rule out use as a GG part"",
+TRUE,lambda(x,
+  ifs(
+    and(join("""",x)=""OK"", $AP3=""yes - color/phenotype CLEARLY match""),TRUE,
+    or(and(settings_gGelProblemBarsUseAsDonor,iferror(match(""Problem"",x,0))), $AP3=""unexpected color/phenotype""),FALSE,
+    TRUE,TRUE
+))
+(iferror(unique(
+{index(settings_GelCodingQualityFlags,match(BI3,settings_GelCodingQuality,0)),
+index(settings_GelCodingIntensityFlags,match(BJ3,settings_GelCodingIntensity,0))
+}
+))))","=if(or($Z3="""",left(Z3)=""s""),"""",
+switch(left(Z3),
+""a"",
+IFERROR(join(char(10),let(output, unique(arrayformula(trim(bycol(
+bycol(index(Assemblies_a_Part_1:Assemblies_a_Part_8,xmatch(Z3,Assemblies_a_ID)),
+lambda(x,if(x="""","""",index(dsDNA_d_Input_DNA,xmatch(x,dsDNA_d_ID))))),
+lambda(x,if(or(x="""",x=""anneal""),"""",iferror(if(AND(REGEXMATCH(index(Registry_Marker,xmatch(x,Registry_Construct_name)), AK3)), x,""""),"""")))))),TRUE), filter(output, output<>""""))), """"),
+""g"",trim(join(char(10),
+bycol(index(Golden_Gate_G_rID1:Golden_Gate_G_rID10,ID_TO_INDEX($Z3)),lambda(col,ifs(
+col="""","""",
+AND(REGEXMATCH(index(Registry_Marker,ID_TO_INDEX(col)), AK3)), index(Registry_Construct_name,ID_TO_INDEX(col)),
+TRUE,""""))))),
+""""))","=ifs(A3="""","""",
+and(H3<>"""",not(regexmatch(H3,""[Pp]roceed""))),if(regexmatch(H3,""(hold)""),""wait; held""&"" (from Minipreps)"",H3&"" (from Minipreps)""),
+
+TRUE,let(output,iferror(unique(filter(Sequencing_mID_What_to_do,Sequencing_Source_ID=B3,Sequencing_mID_What_to_do<>"""",not(regexmatch(Sequencing_mID_What_to_do,""[Pp]roceed""))))),
+ifs(
+
+  FALSE,""mID isn't in Sequencing"",
+  output="""","""",
+
+  FALSE,""single, unique instance of this mID in Sequencing"",
+  counta(output)=1,output&"" (from Sequencing)"",
+
+  FALSE,""check that the multiple instances of this mID in Sequencing don't have conflicting designations"",
+  counta(output)>1,""! Conflicting manual statuses assigned to different instances of this mID in Sequencing!"",
+
+  TRUE,index(Sequencing_mID_What_to_do,xmatch(B3,Sequencing_Source_ID))&"" (from Sequencing)"" 
+)
+))","=if($BK3="""","""",transpose(filter(settings_dAgaroseGelLadderBandSizes,settings_dAgaroseGelLadderChoices=$BK3)))",,,,,,,,,,,,,,,,,,,

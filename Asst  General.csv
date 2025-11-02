@@ -1,0 +1,123 @@
+"Select different tabs, columns:",Registry,(don't show),(don't show),(don't show),(don't show),(don't show),(don't show),(don't show),(don't show),(don't show),formula-related cells,,,,,,,,,
+Serial numbers to list values for ⇩,"Construct name
+(or oID/dID)",,,,,,,,,,Column titles from selected sheet for dropdown menus,Column titles from selected sheet for dropdown menus,Column titles from selected sheet for dropdown menus,Column titles from selected sheet for dropdown menus,Column titles from selected sheet for dropdown menus,Column titles from selected sheet for dropdown menus,Column titles from selected sheet for dropdown menus,Column titles from selected sheet for dropdown menus,Column titles from selected sheet for dropdown menus,Column titles from selected sheet for dropdown menus
+,"=iferror(if(or($A3="""",B$2=""""),"""",
+let(
+ tab,if(regexmatch($A$1,""single""),$B$1,B$1),
+ row_to_use,
+  ifs(
+   regexmatch(""""&$A3,""^\d+$""),$A3+1,
+   regexmatch(""""&$A3,""^[erodagms]\d+$""),ID_TO_NUM($A3)+1,
+   TRUE,""""),
+if(or(tab="""",row_to_use=""""),"""",
+INDEX(INDIRECT(""'"" & tab & ""'!"" & ADDRESS(2, MATCH(B$2, INDIRECT(""'"" & tab & ""'!2:2""), 0)) & "":"" & ADDRESS(ROWS(INDIRECT(""'"" & tab & ""'!A:A"")), MATCH(B$2, INDIRECT(""'"" & tab & ""'!2:2""), 0))),row_to_use)
+))))","=iferror(if(or($A3="""",C$2=""""),"""",
+let(
+ tab,if(regexmatch($A$1,""single""),$B$1,C$1),
+ row_to_use,
+  ifs(
+   regexmatch(""""&$A3,""^\d+$""),$A3+1,
+   regexmatch(""""&$A3,""^[erodagms]\d+$""),ID_TO_NUM($A3)+1,
+   TRUE,""""),
+if(or(tab="""",row_to_use=""""),"""",
+INDEX(INDIRECT(""'"" & tab & ""'!"" & ADDRESS(2, MATCH(C$2, INDIRECT(""'"" & tab & ""'!2:2""), 0)) & "":"" & ADDRESS(ROWS(INDIRECT(""'"" & tab & ""'!A:A"")), MATCH(C$2, INDIRECT(""'"" & tab & ""'!2:2""), 0))),row_to_use)
+))))","=iferror(if(or($A3="""",D$2=""""),"""",
+let(
+ tab,if(regexmatch($A$1,""single""),$B$1,D$1),
+ row_to_use,
+  ifs(
+   regexmatch(""""&$A3,""^\d+$""),$A3+1,
+   regexmatch(""""&$A3,""^[erodagms]\d+$""),ID_TO_NUM($A3)+1,
+   TRUE,""""),
+if(or(tab="""",row_to_use=""""),"""",
+INDEX(INDIRECT(""'"" & tab & ""'!"" & ADDRESS(2, MATCH(D$2, INDIRECT(""'"" & tab & ""'!2:2""), 0)) & "":"" & ADDRESS(ROWS(INDIRECT(""'"" & tab & ""'!A:A"")), MATCH(D$2, INDIRECT(""'"" & tab & ""'!2:2""), 0))),row_to_use)
+))))","=iferror(if(or($A3="""",E$2=""""),"""",
+let(
+ tab,if(regexmatch($A$1,""single""),$B$1,E$1),
+ row_to_use,
+  ifs(
+   regexmatch(""""&$A3,""^\d+$""),$A3+1,
+   regexmatch(""""&$A3,""^[erodagms]\d+$""),ID_TO_NUM($A3)+1,
+   TRUE,""""),
+if(or(tab="""",row_to_use=""""),"""",
+INDEX(INDIRECT(""'"" & tab & ""'!"" & ADDRESS(2, MATCH(E$2, INDIRECT(""'"" & tab & ""'!2:2""), 0)) & "":"" & ADDRESS(ROWS(INDIRECT(""'"" & tab & ""'!A:A"")), MATCH(E$2, INDIRECT(""'"" & tab & ""'!2:2""), 0))),row_to_use)
+))))","=iferror(if(or($A3="""",F$2=""""),"""",
+let(
+ tab,if(regexmatch($A$1,""single""),$B$1,F$1),
+ row_to_use,
+  ifs(
+   regexmatch(""""&$A3,""^\d+$""),$A3+1,
+   regexmatch(""""&$A3,""^[erodagms]\d+$""),ID_TO_NUM($A3)+1,
+   TRUE,""""),
+if(or(tab="""",row_to_use=""""),"""",
+INDEX(INDIRECT(""'"" & tab & ""'!"" & ADDRESS(2, MATCH(F$2, INDIRECT(""'"" & tab & ""'!2:2""), 0)) & "":"" & ADDRESS(ROWS(INDIRECT(""'"" & tab & ""'!A:A"")), MATCH(F$2, INDIRECT(""'"" & tab & ""'!2:2""), 0))),row_to_use)
+))))","=iferror(if(or($A3="""",G$2=""""),"""",
+let(
+ tab,if(regexmatch($A$1,""single""),$B$1,G$1),
+ row_to_use,
+  ifs(
+   regexmatch(""""&$A3,""^\d+$""),$A3+1,
+   regexmatch(""""&$A3,""^[erodagms]\d+$""),ID_TO_NUM($A3)+1,
+   TRUE,""""),
+if(or(tab="""",row_to_use=""""),"""",
+INDEX(INDIRECT(""'"" & tab & ""'!"" & ADDRESS(2, MATCH(G$2, INDIRECT(""'"" & tab & ""'!2:2""), 0)) & "":"" & ADDRESS(ROWS(INDIRECT(""'"" & tab & ""'!A:A"")), MATCH(G$2, INDIRECT(""'"" & tab & ""'!2:2""), 0))),row_to_use)
+))))","=iferror(if(or($A3="""",H$2=""""),"""",
+let(
+ tab,if(regexmatch($A$1,""single""),$B$1,H$1),
+ row_to_use,
+  ifs(
+   regexmatch(""""&$A3,""^\d+$""),$A3+1,
+   regexmatch(""""&$A3,""^[erodagms]\d+$""),ID_TO_NUM($A3)+1,
+   TRUE,""""),
+if(or(tab="""",row_to_use=""""),"""",
+INDEX(INDIRECT(""'"" & tab & ""'!"" & ADDRESS(2, MATCH(H$2, INDIRECT(""'"" & tab & ""'!2:2""), 0)) & "":"" & ADDRESS(ROWS(INDIRECT(""'"" & tab & ""'!A:A"")), MATCH(H$2, INDIRECT(""'"" & tab & ""'!2:2""), 0))),row_to_use)
+))))","=iferror(if(or($A3="""",I$2=""""),"""",
+let(
+ tab,if(regexmatch($A$1,""single""),$B$1,I$1),
+ row_to_use,
+  ifs(
+   regexmatch(""""&$A3,""^\d+$""),$A3+1,
+   regexmatch(""""&$A3,""^[erodagms]\d+$""),ID_TO_NUM($A3)+1,
+   TRUE,""""),
+if(or(tab="""",row_to_use=""""),"""",
+INDEX(INDIRECT(""'"" & tab & ""'!"" & ADDRESS(2, MATCH(I$2, INDIRECT(""'"" & tab & ""'!2:2""), 0)) & "":"" & ADDRESS(ROWS(INDIRECT(""'"" & tab & ""'!A:A"")), MATCH(I$2, INDIRECT(""'"" & tab & ""'!2:2""), 0))),row_to_use)
+))))","=iferror(if(or($A3="""",J$2=""""),"""",
+let(
+ tab,if(regexmatch($A$1,""single""),$B$1,J$1),
+ row_to_use,
+  ifs(
+   regexmatch(""""&$A3,""^\d+$""),$A3+1,
+   regexmatch(""""&$A3,""^[erodagms]\d+$""),ID_TO_NUM($A3)+1,
+   TRUE,""""),
+if(or(tab="""",row_to_use=""""),"""",
+INDEX(INDIRECT(""'"" & tab & ""'!"" & ADDRESS(2, MATCH(J$2, INDIRECT(""'"" & tab & ""'!2:2""), 0)) & "":"" & ADDRESS(ROWS(INDIRECT(""'"" & tab & ""'!A:A"")), MATCH(J$2, INDIRECT(""'"" & tab & ""'!2:2""), 0))),row_to_use)
+))))","=iferror(if(or($A3="""",K$2=""""),"""",
+let(
+ tab,if(regexmatch($A$1,""single""),$B$1,K$1),
+ row_to_use,
+  ifs(
+   regexmatch(""""&$A3,""^\d+$""),$A3+1,
+   regexmatch(""""&$A3,""^[erodagms]\d+$""),ID_TO_NUM($A3)+1,
+   TRUE,""""),
+if(or(tab="""",row_to_use=""""),"""",
+INDEX(INDIRECT(""'"" & tab & ""'!"" & ADDRESS(2, MATCH(K$2, INDIRECT(""'"" & tab & ""'!2:2""), 0)) & "":"" & ADDRESS(ROWS(INDIRECT(""'"" & tab & ""'!A:A"")), MATCH(K$2, INDIRECT(""'"" & tab & ""'!2:2""), 0))),row_to_use)
+))))","=if(or(B1="""",regexmatch(B1,""don't"")),"""",
+let(column_headers,TRANSPOSE(INDIRECT(""'"" &B1& ""'!$A$2:$ZZ$2"")),filter(column_headers,column_headers<>"""")))","=if(regexmatch($A$1,""single""),{$L$3:$L},
+if(or(C1="""",regexmatch(C1,""don't"")),"""",
+let(column_headers,TRANSPOSE(INDIRECT(""'"" &C1& ""'!$A$2:$ZZ$2"")),filter(column_headers,column_headers<>""""))))","=if(regexmatch($A$1,""single""),{$L$3:$L},
+if(or(D1="""",regexmatch(D1,""don't"")),"""",
+let(column_headers,TRANSPOSE(INDIRECT(""'"" &D1& ""'!$A$2:$ZZ$2"")),filter(column_headers,column_headers<>""""))))","=if(regexmatch($A$1,""single""),{$L$3:$L},
+if(or(E1="""",regexmatch(E1,""don't"")),"""",
+let(column_headers,TRANSPOSE(INDIRECT(""'"" &E1& ""'!$A$2:$ZZ$2"")),filter(column_headers,column_headers<>""""))))","=if(regexmatch($A$1,""single""),{$L$3:$L},
+if(or(F1="""",regexmatch(F1,""don't"")),"""",
+let(column_headers,TRANSPOSE(INDIRECT(""'"" &F1& ""'!$A$2:$ZZ$2"")),filter(column_headers,column_headers<>""""))))","=if(regexmatch($A$1,""single""),{$L$3:$L},
+if(or(G1="""",regexmatch(G1,""don't"")),"""",
+let(column_headers,TRANSPOSE(INDIRECT(""'"" &G1& ""'!$A$2:$ZZ$2"")),filter(column_headers,column_headers<>""""))))","=if(regexmatch($A$1,""single""),{$L$3:$L},
+if(or(H1="""",regexmatch(H1,""don't"")),"""",
+let(column_headers,TRANSPOSE(INDIRECT(""'"" &H1& ""'!$A$2:$ZZ$2"")),filter(column_headers,column_headers<>""""))))","=if(regexmatch($A$1,""single""),{$L$3:$L},
+if(or(I1="""",regexmatch(I1,""don't"")),"""",
+let(column_headers,TRANSPOSE(INDIRECT(""'"" &I1& ""'!$A$2:$ZZ$2"")),filter(column_headers,column_headers<>""""))))","=if(regexmatch($A$1,""single""),{$L$3:$L},
+if(or(J1="""",regexmatch(J1,""don't"")),"""",
+let(column_headers,TRANSPOSE(INDIRECT(""'"" &J1& ""'!$A$2:$ZZ$2"")),filter(column_headers,column_headers<>""""))))","=if(regexmatch($A$1,""single""),{$L$3:$L},
+if(or(K1="""",regexmatch(K1,""don't"")),"""",
+let(column_headers,TRANSPOSE(INDIRECT(""'"" &K1& ""'!$A$2:$ZZ$2"")),filter(column_headers,column_headers<>""""))))"

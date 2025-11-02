@@ -1,0 +1,236 @@
+Sequencing,,,,"=counta(iferror(filter(Sequencing_Sequencing_type,Sequencing_Sequencing_type=""Sanger"",Sequencing_Date_mixed="""",iferror(search(""ready to mix"",Sequencing_Status)))))&"" Sanger ready for mixing
+""&
+counta(iferror(filter(Sequencing_Sequencing_type,Sequencing_Sequencing_type=""Whole-plasmid"",Sequencing_Date_mixed="""",iferror(search(""ready to mix"",Sequencing_Status)))))&"" Whole-plasmid ready for mixing""",,,1. Sample properties,,,,2. Queueing,,,,,,,,,,,"3a. Mixing,
+calculated volumes",,,"3b. Mixing,
+actual volumes",,,"=""Next Sanger well: ""&
+ifs(
+BN1="""","""",
+not(isnumber(BN1)),BN1,
+TRUE,char(if(mod(BN1,8)=0,8,mod(BN1,8))+64)&TEXT(CEILING(if(mod(BN1,96)=0,96,mod(BN1,96))/8),""00""))
+&""
+""&
+ifs(
+BP1="""","""",
+not(isnumber(BP1)),BP1,
+TRUE,""Next Whole-plasmid well: ""&char(if(mod(BP1,8)=0,8,mod(BP1,8))+64)&TEXT(CEILING(if(mod(BP1,96)=0,96,mod(BP1,96))/8),""00""))",,,,3c. Mixing,,,4. Submission,,5. Results,,,,,,,,,,,,,,6. Alignment,,,,,7. Interpretation,,,,,,,,Next Sanger well #:,"=iferror(
+let(serialnos,iferror(filter(BN3:BN,AF3:AF<>"""",AJ3:AJ="""",regexmatch(F3:F,""Sanger""),not(regexmatch(I3:I,""[Oo]mit""))),#VALUE!),
+ifs(
+iserror(serialnos),1,
+counta(serialnos)=0,1,
+join("","",unique(sort(serialnos)))<>join("","",sort(serialnos)),""Error: repeated well ID in unsubmitted Sanger samples! ""&join("","",array_constrain(unique(filter(serialnos, countif(serialnos, serialnos) > 1)),3,1)),
+max(serialnos)=counta(serialnos),counta(serialnos)+1,
+TRUE,xmatch(FALSE,arrayformula(sequence(counta(serialnos))=sort(serialnos)))
+)),1)",Next whole-plasmid well #:,"=iferror(
+let(serialnos,iferror(filter(BN3:BN,AF3:AF<>"""",AJ3:AJ="""",regexmatch(F3:F,""Whole-plasmid""),not(regexmatch(I3:I,""[Oo]mit""))),#VALUE!),
+ifs(
+iserror(serialnos),1,
+counta(serialnos)=0,1,
+join("","",unique(sort(serialnos)))<>join("","",sort(serialnos)),""Error: repeated well ID in unsubmitted whole-plasmid samples!"",
+max(serialnos)=counta(serialnos),counta(serialnos)+1,
+TRUE,xmatch(FALSE,arrayformula(sequence(counta(serialnos))=sort(serialnos)))
+)),1)",,,
+"=iferror(if(join("","",filter(A3:A,A3:A<>""""))<>join("","",sequence(max(A3:A))),
+""ERROR near #""&index(filter(sort(A3:A,1,TRUE),sort(A3:A,1,TRUE)<>sort(row(A3:A)-2,1,TRUE)),1)-1&""!"", 
+""Serial #""),""Serial #"")",Sort #,Source ID,Template name,Source origin,Sequencing type,Status,"Priority
+?",What to do with this sample?,General notes,Exclude from analysis?,Primers recommended from Registry,Primers already sequenced,Primer (o),Date queued,Queued by,Colony stock or analytical PCR #,Queue notes,Certify correctly queued,Queueing validity check,Actual template conc (ng/µL),Scale (µL),Volume calculation,Calc µL template,Calc µL primer,µL template,µL primer,µL water,Actual template ng,Mixing instructions,Well from Sort #,Well for mixed sample,Date mixed,Mixed by,Mix notes,Date samples submitted,Company,Data ready?,Quality score,Length of read,Failure reason,Whole-plasmid sequencing outcome,Whole-plasmid sequencing size,% E. coli genome,Multimerization,Order repeat?,Repeats data ready?,Repeat QS,Repeat CRL,Repeat Failure Reason,Assembly components with same marker as construct,Size,Primer (for reference),Date aligned,Aligned by,Alignment classification,Alignment interpretation guidelines,Date interpreted,Interpreted by,Alignment interpretation,Cumulative sequencing/QC results,Notes,What to do with this mID?,Minipreps Status,"={""Sequencing submission ID"";arrayformula(if(BO3:BO="""","""",BO3:BO&""_""&BQ3:BQ))}",Well serial #,Submission template name,Genewiz size range,Primer,Sequencing alignment summary,Sequencing primer succeeded?
+1,,,"=if(C3="""","""",
+iferror(
+switch(left(C3),
+""m"",index(Minipreps_m_Construct_name,ID_TO_INDEX(C3)),
+""d"",index(dsDNA_d_Template_used,ID_TO_INDEX(C3)),
+""a"",index(Assemblies_a_Construct_name,ID_TO_INDEX(C3)),
+""g"",index(Golden_Gate_g_Construct_name,ID_TO_INDEX(C3)),
+""???"")
+,""???""))","=if(C3="""","""",
+if(left(C3)=""m"",iferror(index(Minipreps_m_Source_ID,ID_TO_INDEX(C3)),""?""),C3))",,"=ifs(C3="""","""",
+not(S3),""certify queueing!"",
+regexmatch($I3,""⛔""),$I3,
+regexmatch($I3,""(hold)""),""wait; held"",
+
+TRUE,
+let(status,
+  iferror(GET_STATUS_BY_ID(C3),""???""),
+ifs(
+status=""???"",""???"",
+FALSE,""If unmixed, check if it's ready to mix"",
+AG3="""",ifs(
+ FALSE,""Check for manual discarding or problem with source ID"",
+ 
+ regexmatch(status,""⛔|\!""),""Source status:""&char(10)&status,
+ iferror(regexmatch(index(Oligos_o_Status,xmatch(N3,Oligos_o_ID)),""⛔""),FALSE),""primer is lost/abandoned!"",
+ and(F3=""Sanger"",not(regexmatch(index(Oligos_o_Status,ID_TO_INDEX(N3)),""done""))),""wait on primer"",
+ not(regexmatch(status,""done"")),""wait on source"",
+ and(settings_SequencingRequireQC?,left(C3)=""d"",regexmatch(status,""(gel)|(quant)"")),""wait on source QC"",
+
+ FALSE,""Seems ready to mix; append warnings, if any"",
+ TRUE,""ready to mix ""&""(""&F3&"")""&
+  let(construct_status,iferror(index(Registry_Status,xmatch(D3,Registry_Construct_name))),if(iferror(regexmatch(construct_status,""([Cc]omplete)|([Aa]bandon)|(held)""),FALSE),char(10)&""redundant? source status ""&construct_status,""""))&
+  if(and(F3=""Whole-plasmid"",U3<settings_SequencingWholePlasmidConcWarning),char(10)&""conc risky!"","""")&
+  let(vol_available,switch(left(C3),""d"",index(dsDNA_d_Volume_left,ID_TO_INDEX(C3)),""m"",index(Minipreps_m_Volume_left,ID_TO_INDEX(C3)),999),
+      vol_queued,iferror(index('(Lookup lists & tabulations)'!$S$3:$S,xmatch(C3,'(Lookup lists & tabulations)'!$R$3:$R)),-1),
+      minVolWarn,settings_dMinVolumeWarn,minVolUse,switch(left(C3),""d"",settings_dMinVolumeToStillUse,""m"",settings_mMinVolumeLeft,-1),
+      ifs(
+        vol_available<=minVolWarn,char(10)&""source ID vol low?"",
+        vol_queued>vol_available-minVolUse,char(10)&""source overqueued!"",
+        vol_queued>vol_available-minVolWarn,char(10)&""source nearly overqueued?"",
+        TRUE,""""))),
+
+regexmatch(I3,""[Oo]mit""),""don't order read (done)"",
+and(AG3<>"""",AF3=""""),""enter well used for mixed sample!"",
+AJ3="""",""mixed, waiting to submit"",
+AL3="""",""wait on data"",
+BC3="""",""ready to align"",
+BF3="""",if(or(regexmatch(lower(BD3),""not usable""),regexmatch(lower(BD3),""not required"")),""done"",""ready to interpret""&if(regexmatch(lower(BD3),""read completely matches""),"" (easy)"","" (hard)"")),
+TRUE,""done""
+)))&if(H3,"" (priority)"","""")&
+let(
+entry_list, {$O3:$P3,$S3,$Z3,$AF3:$AH3,$AJ3,$AL3,$BB3:$BD3,$BF3:$BH3},
+ifs(
+index(entry_list,1)="""","""",
+NOT(regexmatch(join(""◆"",entry_list),""[^◆]◆{2,}[^◆]"")),"""",
+true,char(10)&""missing data?""
+))","=if(C3="""","""",
+iferror(regexmatch(Registry_Priority_flagged_IDs,C3&"","")))",,,,"=if(C3="""","""",
+iferror(index(Registry_Sequencing_primers,xmatch(D3,Registry_Construct_name))))","=if(C3="""","""",
+join("","",iferror(filter(Sequencing_Primer,Sequencing_Source_ID=C3,Sequencing_Date_mixed<>"""",Sequencing_Colony_stock_no=C3,not(regexmatch(Sequencing_What_to_do_with_this,""⛔"")),regexmatch(Sequencing_Sequencing_type,""Sanger"")))))",,,,,,false,"=ifs(C3="""","""",
+S3,""Certified OK"",
+not(regexmatch(C3,""^[mdag]\d+$"")),""Invalid source ID"",
+
+FALSE,""Check for nonexistent source ID (xmatch returns the position of the match, so if the ID is found, not(xmatch()) is false"",
+not(iferror(switch(left(C3),
+ ""m"",xmatch(C3,Minipreps_m_ID),
+ ""d"",xmatch(C3,dsDNA_d_ID),
+ ""a"",xmatch(C3,Assemblies_a_ID),
+ ""g"",xmatch(C3,Golden_Gate_g_ID),
+ ""t"",xmatch(C3,Transformations_ID),
+ FALSE),FALSE)),""source ID not found!"",
+
+F3="""",""enter sequencing type!"",
+and(F3=""Sanger"",$N3=""""),""enter oligo primer!"",
+O3="""",""enter date queued!"",
+P3="""",""enter queued by!"",
+
+iferror(regexmatch(index(Oligos_o_Status,xmatch(N3,Oligos_o_ID)),""don't use""),FALSE),""primer is lost/abandoned!"",
+
+or(left(C3)=""a"",left(C3)=""g"",left(C3)=""t""),
+  if(Q3="""",""enter a colony stock #!"",""Sequencing directly from aID/gID/tID colony stocks (e.g. via RCA or analytical PCR) is not yet fully supported. Most automatic checks aren't in place. Proceed with care.""),
+
+left(C3)=""d"",ifs(
+  index(dsDNA_d_Date_finished,xmatch(C3,dsDNA_d_ID))="""",""wait on d"",
+
+  FALSE,""Check volume for dIDs"",
+  TRUE,let(vol_available,index(dsDNA_d_Volume_left,xmatch(C3,dsDNA_d_ID)),
+      vol_queued,iferror(index('(Lookup lists & tabulations)'!$M$3:$M,xmatch(C3,'(Lookup lists & tabulations)'!$L$3:$L)),0),
+      ifs(
+        vol_available<settings_dMinVolumeToStillUse,""source ID vol low!"",
+        vol_available<=settings_dMinVolumeWarn,""source ID vol low?"",
+        vol_queued>vol_available-settings_dMinVolumeToStillUse,""overqueued!"",
+        vol_queued>vol_available-settings_dMinVolumeWarn,""nearly overqueued?"",
+        TRUE,""✓ No queueing errors found""
+))),
+
+FALSE,""and now for mID sources"",
+iferror(index(Minipreps_m_Date_purified,match($C3,Minipreps_m_ID,0)))="""",""✓ No queueing errors found""&char(10)&""wait on m"",
+TRUE,let(vol_available,iferror(index(Minipreps_m_Volume_left,xmatch(C3,Minipreps_m_ID))),
+         vol_queued,iferror(index('(Lookup lists & tabulations)'!$Q$3:$Q,xmatch(C3,'(Lookup lists & tabulations)'!$P$3:$P))),
+         ifs(
+           vol_available<settings_mMinVolumeLeft,""source ID vol low!"",
+           vol_available<=settings_mWarnVolumeLeft,""source ID vol low?"",
+           vol_queued>vol_available-settings_mMinVolumeLeft,""overqueued!"",
+           vol_queued>vol_available-settings_mWarnVolumeLeft,""nearly overqueued?"",
+           TRUE,""✓ No queueing errors found""&
+             let(status,index(Registry_Status,xmatch(D3,Registry_Construct_name)),if(iferror(regexmatch(status,""([Cc]omplete)|([Aa]bandon)|(held)""),FALSE),char(10)&char(10)&""redundant? source status ""&status,""""))&
+             if(and(F3=""Whole-plasmid"",U3<settings_SequencingWholePlasmidConcWarning),char(10)&char(10)&""conc risky!"","""")))
+)
+&
+ifs(
+C3="""","""",
+S3,"""",
+F3=""Whole-plasmid"",
+ if(counta(iferror(filter(Sequencing_Source_ID,Sequencing_Source_ID=$C3,Sequencing_Date_mixed="""",Sequencing_Colony_stock_no=Q3)))>1,char(10)&char(10)&""Duplicate of queued sample?"",
+ if(counta(iferror(filter(Sequencing_Source_ID,Sequencing_Sequencing_type=""Whole-plasmid"",Sequencing_Source_ID=$C3,Sequencing_Date_mixed<>"""",Sequencing_Colony_stock_no=C3,not(regexmatch(Sequencing_What_to_do_with_this,""(don't use)"")))))>1,char(10)&char(10)&""Duplicate of mixed/submitted sample?"","""")),
+N3="""","""",
+regexmatch("",""&M3&"","","",""&N3&"",""),char(10)&char(10)&""Duplicate of mixed/submitted sample?"", 
+counta(iferror(filter(Sequencing_Source_ID,Sequencing_Source_ID=$C3,Sequencing_Primer=$N3,Sequencing_Date_mixed="""",Sequencing_Colony_stock_no=Q3)))>1,char(10)&char(10)&""Duplicate of queued sample?"",
+TRUE,"""")
+&
+ifs(
+C3="""","""",
+S3,"""",
+and(regexmatch(L3,""o\d+""),not(regexmatch(L3,N3))),char(10)&char(10)&""Primer not listed in registry?"",
+TRUE,"""")
+","=IF(C3<>"""",
+IFERROR(
+switch(left(C3),
+""m"",iferror(INDEX('Minipreps m'!$BB:$BB,MATCH(C3,'Minipreps m'!$B:$B,0))),
+""d"",iferror(INDEX('dsDNA d'!$BK:$BK,MATCH(C3,'dsDNA d'!$B:$B,0))),
+"""")
+,"""")
+,"""")","=if(C3="""","""",
+ifs(
+F3=""Whole-plasmid"",if(and(isnumber(U3),U3>=settings_SequencingWholePlasmidHighConcThreshold),settings_SequencingWholePlasmidHighConcVolume,settings_SequencingWholePlasmidLowConcVolume),
+TRUE,settings_SequencingSangerScale))","=if(C3="""","""",
+let(template_vol,
+iferror(if(
+F3=""Whole-plasmid"",V3,
+if(left(C3)=""d"",
+ ifs(
+   FALSE,""Quintara Biosciences requests about 10 ng per kb of PCR amplicon"",
+   FALSE,""Genewiz/Azenta specifies the scaling below, which is more conservative"",
+   AZ3>6,80,AZ3>4,50,AZ3>2,6,AZ3>1,4,AZ3>0.5,2,TRUE,1)*V3,
+ settings_SequencingSangerPlasmidTargetng)
+ / if(U3="""",settings_SequencingSangerPlasmidDefaultConc,U3)),""""),
+primer_vol,if(F3=""Sanger"",settings_SequencingPrimerVolume,""""),
+{""Calculated:"",
+if(template_vol>V3-primer_vol,V3-primer_vol,template_vol),
+primer_vol}
+))",,,,,"=if(or(C3="""",Z3=""""),"""",
+let(water,V3-Z3-AA3,
+if(abs(water)<0.1,"""",water)))","=if(or(C3="""",U3="""",Z3=""""),"""",
+Z3*U3)","=if(or(C3="""",B3=""""),"""",
+if(Z3="""",""Enter volumes to use"",
+""template: ""&ID_TO_WELL(settings_SampleStoragePlateSize,C3)&"" ""&text(Z3,""0.00"")&"" µL""&
+if(AA3<>"""",""
+  primer: ""&ID_TO_WELL(settings_SampleStoragePlateSize,N3)&"" ""&text(AA3,""0.00"")&"" µL"","""")&
+if(AB3<>"""",""
+   water:        ""&text(AB3,""0.00"")&"" µL"","""")))","=if(B3="""","""",char(if(mod(B3,8)=0,8,mod(B3,8))+64)&TEXT(CEILING(if(mod(B3,96)=0,96,mod(B3,96))/8),""00""))",,,,,,,,,,,,,,,,,,,,"=ifs(C3="""","""",
+left(C3)<>""m"","""",
+TRUE,index('Minipreps m'!$CG:$CG,ID_TO_INDEX(C3)))","=if($C3="""","""",
+if(left(C3)=""d"",index('dsDNA d'!$AO$3:$AO,match(C3,'dsDNA d'!$B$3:$B,0)),
+index(Registry!$N$3:$N,match($D3,Registry!$C$3:$C,0))))",=N3,,,,"=ifs($C3="""","""",
+     $AL3="""","""",
+     $BB3="""",""Align read to show interpretation guidance"",
+     and(BF3<>"""",BH3<>""""),""alignment interpreted"",
+BD3=""Read does not match map at all (where read quality is good)"",""This may be a mixup at some stage of the construction process or a complex misassembly. Start by checking carefully whether even ~10 bases near the beginning of the read match the expected construct; if so, reclassify the alignment as a partial but not complete match. If not, try BLASTing the read or searching for high-quality parts of its sequence in the construct database to see what it might correspond to."",
+     and(BD3=""Read partially, but not completely, matches map (where read quality is good)"",AY3<>""""),""The read alignment doesn't completely match ""&D3&"". ""&index(transpose(split(AY3,""
+"")),1)&"" also confers ""&index(Registry_Marker,xmatch(D3,Registry_Construct_name))& "" resistance. Start by aligning the read to the ""&index(transpose(split(AY3,""
+"")),1)&"" sequence and look for an exact match, which would indicate the read is from that template/part, not the assembled construct. ""&if(counta(split(AY3,char(10)))=1,""If there's no exact match, this may be a misassembly."",""If ""&index(transpose(split(AY3,""
+"")),1)&"" isn't an exact match, check each of the templates below which confer the same antibiotic resistance. If there's no exact match to any of these constructs, this may be a misassembly.""&""
+
+All templates with the same marker:
+""&AY3),
+     left($E3)=""g"", ""This is a Golden Gate construct with ""& counta(index('Golden Gate g'!CY:DH, xmatch($E3,Golden_Gate_g_ID))) - countblank(index('Golden Gate g'!CY:DH, xmatch($E3,Golden_Gate_g_ID))) & "" parts ("" & trim(join("", "",let(output,bycol(index('Golden Gate g'!CY:DH, xmatch($E3,Golden_Gate_g_ID)),lambda(col,ifs(
+     col="""","""",
+     TRUE,col))), filter(output, output<>"""")))) & ""). Sequencing needed to verify parts are present but not needed for internal sequence coverage."",
+     iferror(index(Registry_Golden_Gate_donor?,xmatch($D3,Registry_Construct_name))=""yes"",FALSE), ""This is a Golden Gate donor and must be sequence verified from the 5' "" &index(Registry_GG_enzyme,xmatch($D3,Registry_Construct_name)) & "" "" &index(Registry_5_overhang,xmatch($D3,Registry_Construct_name))& "" overhang through the 3' ""&index(Registry_3_overhang,xmatch($D3,Registry_Construct_name)) &"" overhang."",
+     left($E3)=""a"", ""This is an assembly using ""& counta(index('Assemblies a'!P:W, xmatch($E3,Assemblies_a_ID))) & "" PCR products ("" & trim(join("", "",let(output,bycol(index('Assemblies a'!P:W, xmatch($E3,Assemblies_a_ID)),lambda(col,ifs(
+     col="""","""",
+     TRUE,col))), filter(output, output<>"""")))) & ""). Needs to be fully sequenced verified."",
+     left($E3) =""d"", if($R3 <>"""", ""Queue notes say:"" & $R3, ""Consult ""& $P3 &"" for guidance.""),
+TRUE, if($R3 <>"""", ""Queue notes say:"" & $R3, ""Consult ""& $P3 &"" for guidance."")
+)",,,,,,,"=ifs(
+C3="""","""",
+left(C3)<>""m"","""",
+TRUE,index(Minipreps_m_Status,ID_TO_INDEX(C3)))",,"=if(AF3="""","""",
+(right(AF3,2)-1)*8+code(left(AF3))-64)","=ifs(C3="""","""",
+regexmatch(I3,""[Oo]mit""),"""",
+TRUE,D3&""-""&C3)","=if(BO3="""","""",
+ifs(
+AZ3<0.501,""<501"",
+AZ3<1.001,""501-1000"",
+AZ3<2.001,""1001-2000"",
+AZ3<4.001,""2001-4000"",
+AZ3<6.001,""4001-6000"",
+TRUE,""???"")
+)","=if(BO3="""","""",N3)","=if(BB3="""","""",
+if(BF3="""",join("" - "",BB3:BD3),join("" - "",BF3:BK3)))",

@@ -1,0 +1,70 @@
+Oligos o,,,,,1. Sample properties,,,2. Queueing,,,,,,,,,,,,3. Ordering and stock,,,,4. Associated data,,,"=iferror(min(AB3:AB)&""-""&max(AB3:AB)&"", median ""&median(AB3:AB))",Used by formulas >,,
+"=iferror(if(join("","",filter(A3:A,A3:A<>""""))<>join("","",sequence(max(A3:A))),
+""ERROR near #""&index(filter(sort(A3:A,1,TRUE),sort(A3:A,1,TRUE)<>sort(row(A3:A)-2,1,TRUE)),1)-1&""!"", 
+""Serial #""),""Serial #"")","={""ID"";arrayformula(if(A3:A<>"""",""o""&A3:A,""""))}","={if(regexmatch(settings_SampleStoragePlateSize,""b""),""Box"",""Well"");arrayformula(if(A3:A="""","""",ID_TO_WELL(settings_SampleStoragePlateSize,B3:B)))}",Sort #,Status,"Priority
+?",What to do with this sample?,General notes,Date queued,Queued by,USER primer? (first capital T at dU position),dsDNA or ultramer?,Sequencing or analysis primer?,Direct receipt?,Queue notes,Sequence,"=""Lowest-energy secondary structure""&if(settings_oSecondaryStructureHeaderText<>"""","" ""&settings_oSecondaryStructureHeaderText,"""")",Certify correctly queued,Queueing validity check,Well & ID for copy/paste,Date ordered/plate #,Date arrived,Date stocks made,Stocks made by,Length,USER junction sequence,={AE2:AE},USER junction length,USER junction reverse complement,Order sequence,oIDs with same USER junction
+1,o1,o01.A01,,"=ifs(A3="""","""",
+P3="""","""",
+not(R3),""certify queueing!"",
+regexmatch(G3,""⛔""),G3,
+regexmatch(G3,""(hold)""),""wait; held"",
+and(U3="""",N3=""no""),""ready to order"",
+and(V3="""",N3=""no""),""wait on shipping"",
+W3="""",""ready to stock"",
+TRUE,""done"")&
+if(F3,"" (priority)"","""")&
+let(entry_list, 
+ if(N3=""no"",{$I3:$K3,$N3,$P3,$R3,$U3:$X3},{$I3:$K3,$N3,$P3,$R3,$W3:$X3}),
+ifs(
+index(entry_list,1)="""","""",
+NOT(regexmatch(join(""◆"",entry_list),""[^◆]◆{2,}[^◆]"")),"""",
+true,char(10)&""missing data?""
+)
+)&
+ifs(A3="""","""",
+M3,"""",
+if(L3,iferror(xmatch(B3,dsDNA_d_Input_DNA)),FALSE),"""",
+if(L3,iferror(xmatch(B3,dsDNA_d_DNA_to_digest)),FALSE),"""",
+iferror(xmatch(B3,dsDNA_d_Oligo_1)),"""",
+iferror(xmatch(B3,dsDNA_d_Oligo_2)),"""",
+TRUE,char(10)&""not yet used for dsDNA?"")
+","=if(A3="""","""",
+iferror(and(B3<>"""",regexmatch(Registry_Priority_flagged_IDs,B3&"",""))))",,,,,,,,,,,,,"=ifs(
+A3="""","""",
+R3,""Certified OK"",
+P3="""",""enter sequence!"",
+Y3<settings_oOligoMinLength,""Length must be ≥""&settings_oOligoMinLength&""!"",
+and(not(L3),Y3>settings_oOligoMaxLength),""Length must be ≤""&settings_oOligoMaxLength&""!"",
+and(K3=""y"",Z3=""""),""No T found to specify dU position!"",
+and(K3=""Y"",Z3=AC3),""USER junction is a palindrome!"",
+countif($P$3:$P,""=""&P3)>1,""Duplicate! ""&join("" "",filter('Oligos o'!$B$3:$B,'Oligos o'!$P$3:$P=P3,'Oligos o'!$B$3:$B<>B3)),
+counta(iferror(filter($P$3:$P,$B$3:$B<>B3,abs($Y$3:$Y-Y3)<=settings_oOligoValidationSubstringLengthDiff,regexmatch(lower($P$3:$P),lower(P3)))))>0,
+ ""oIDs ""&join("" "",iferror(filter($B$3:$B,$B$3:$B<>B3,abs($Y$3:$Y-Y3)<=settings_oOligoValidationSubstringLengthDiff,regexmatch(lower($P$3:$P),lower(P3)))))&
+  "" fully contain this sequence. Is that ok?"",
+counta(iferror(filter($P$3:$P,$B$3:$B<>B3,abs($Y$3:$Y-Y3)<=settings_oOligoValidationSubstringLengthDiff,regexmatch(lower(P3),lower($P$3:$P)))))>0,
+ ""oIDs ""&join("" "",iferror(filter($B$3:$B,$B$3:$B<>B3,abs($Y$3:$Y-Y3)<=settings_oOligoValidationSubstringLengthDiff,regexmatch(lower(P3),lower($P$3:$P)))))&
+  "" are fully contained by this sequence. Is that ok?"",
+and(not(L3),Y3>settings_oOligoSynthScaleChangeLen),""Does length need to be >""&settings_oOligoSynthScaleChangeLen&""?"",
+and(AB3<>"""",or(AB3<percentile($AB$3:$AB,0.05),AB3>percentile($AB$3:$AB,0.95))),""Unusual USER junction length?"",
+and(K3<>""y"",len(P3)<99,and((left(P3,1)=""A""),iferror(len(left(P3,find(""T"",P3))),99)<=max($AB$3:$AB),iferror(len(left(P3,find(""T"",P3))),99)>=min($AB$3:$AB))),""Is this meant to be a USER primer?"",
+TRUE,""✓ No queueing errors found"")
+","=if(C3<>"""",C3&"" ""&B3&if(K3=""Y"","" U"",""""),"""")",,,,,"=if(P3<>"""",len(
+regexreplace(substitute(ifs(
+regexmatch(P3,""dU""),substitute(P3,""dU"",""U""),
+regexmatch(P3,""\/ideoxyU\/""),substitute(P3,""/ideoxyU/"",""U""),
+regexmatch(P3,""ideoxyU""),substitute(P3,""ideoxyU"",""U""),
+regexmatch(P3,""deoxyU""),substitute(P3,""deoxyU"",""U""),
+TRUE,P3),""*"",""""),""\/.*\/"","""")
+),"""")","=if(or(P3="""",K3<>""y""),"""",
+trim(
+let(dU_code,
+ifs(
+regexmatch(P3,""dU""),""dU"",
+regexmatch(P3,""\/ideoxyU\/""),""/ideoxyU/"",
+regexmatch(P3,""ideoxyU""),""ideoxyU"",
+regexmatch(P3,""deoxyU""),""deoxyU"",
+regexmatch(P3,""U""),""U"",
+TRUE,""T""),
+iferror(lower(substitute(left(P3,find(dU_code,P3)+len(dU_code)-1),dU_code,""T"")))
+)))",,"=if(Z3<>"""",len(Z3),"""")","=if(Z3="""","""",
+DNA_REVERSE_COMPLEMENT(Z3))","=IF(P3<>"""",IF(K3=""Y"",IFERROR(IF(P3<>"""",LEFT(P3,FIND(""T"",P3)-1)&""/ideoxyU/""&RIGHT(P3,LEN(P3)-FIND(""T"",P3)),"" ""),P3),P3),"""")","=iferror(if(Z3="""","""",join("" "",sort(filter(Oligos_o_Num,Z:Z=Z3,Oligos_o_Num<>A3),1,FALSE))))"
